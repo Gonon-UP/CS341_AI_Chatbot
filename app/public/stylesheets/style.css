@@ -1,8 +1,68 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+:root {
+  --background-color: #31234b;
+  --element-color: #261c39;
+  --title-color: #ffffff;
+  --element-title-color: #d4d4d4;
 }
 
-a {
-  color: #00B7FF;
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  font-family: sans-serif;
+}
+
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  color: var(--title-color);
+  padding-top: 15px;
+  padding-right: 15px;
+  padding-left: 30px;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.row {
+  flex: 1;
+  display: flex;
+
+  padding: 15px;
+  gap: 20px;
+
+  box-sizing: border-box;
+}
+
+.left-container {flex: 1;}
+.chatbot-container {flex: 2;}
+.right-container {flex: 1;}
+
+.left-container, .right-container {
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 16px;
+}
+
+.chatbot-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.child {
+  flex: 1;
+  background: var(--element-color);
+  color: var(--element-title-color);
+  padding: 15px;
+  border-radius: 20px;  /* rounded corners */
+  box-shadow: 0 2px 8px #00000014;
+}
+
+.child-header {
+  font-weight: bold;
+  border-bottom: 1px solid var(--background-color); /* white line */
+  padding-bottom: 8px;              /* space between text and line */
+  margin-bottom: 8px;               /* space between line and content */
 }
