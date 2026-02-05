@@ -1,6 +1,8 @@
 :root {
   --background-color: #31234b;
   --element-color: #261c39;
+  --border-color: #4d3b6b;
+  --highlight-color: #3d2b5d;
   --title-color: #ffffff;
   --element-title-color: #d4d4d4;
 }
@@ -36,17 +38,15 @@ body {
   box-sizing: border-box;
 }
 
-.left-container {flex: 1;}
-.chatbot-container {flex: 2;}
-.right-container {flex: 1;}
-
 .left-container, .right-container {
+  flex: 1;
   display: flex;
   flex-direction: column; /* stack vertically */
   gap: 16px;
 }
 
 .chatbot-container {
+  flex: 2;
   display: flex;
   flex-direction: column;
 }
@@ -55,14 +55,109 @@ body {
   flex: 1;
   background: var(--element-color);
   color: var(--element-title-color);
-  padding: 15px;
-  border-radius: 20px;  /* rounded corners */
-  box-shadow: 0 2px 8px #00000014;
+  /* 1. Change padding to 0 so the input can actually reach the bottom */
+  padding: 0; 
+  border-radius: 20px;
+  box-shadow: 0 2px 8px #00000020;
+  
+  /* 2. Add these to make the child a flex column */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Keeps input corners from poking out */
 }
 
 .child-header {
+  /* 3. Add padding back here so the text isn't touching the edges */
+  padding: 15px; 
   font-weight: bold;
-  border-bottom: 1px solid var(--background-color); /* white line */
-  padding-bottom: 8px;              /* space between text and line */
-  margin-bottom: 8px;               /* space between line and content */
+  border-bottom: 1px solid var(--background-color);
+}
+
+.child-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* overflow: hidden; -> Move this to .child */
+}
+
+.message-area {
+  flex-grow: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 15px; /* Adds space for your messages */
+}
+
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 15px;
+  
+  /* 4. THE SECOND FIX: Lock the container's width */
+  width: 100%;
+  max-width: 100%;      /* Absolute limit */
+  box-sizing: border-box;
+  flex-shrink: 0;       /* Prevents the footer from squishing vertically */
+}
+
+.text-box {
+  /* 1. THE CRITICAL FIX: Force the box to ignore text-length for width */
+  flex: 1 1 0;          /* Grow and shrink from a baseline of 0 */
+  width: 0;             /* Tells the browser: "Don't get your width from the text" */
+  min-width: 0;         /* Allows it to be smaller than default textarea size */
+  
+  /* 2. Vertical Growth Logic */
+  field-sizing: content;
+  overflow-wrap: break-word; /* Forces long words to break rather than push */
+  
+  /* 3. Existing styling */
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--background-color);
+  color: white;
+  font: inherit;
+  border: 1px solid var(--border-color);
+  outline: none;
+  resize: none;
+  min-height: 42px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+.text-box:focus {
+  border-color: white;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.text-box:hover {
+  background-color: var(--highlight-color);
+}
+
+.send-button {
+  width: 43px;
+  height: 43px;
+  border-radius: 50%; /* Makes it circular */
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  /* Lighter purple than the dark background */
+  background-color: var(--background-color); 
+  color: white; /* Darker text for contrast */
+  
+  /* Smoothly fades the color over 0.3 seconds */
+  transition: background-color 0.3s ease;
+}
+
+.send-button:hover {
+  /* Fades to a light whitish purple */
+  background-color: var(--highlight-color);
 }
