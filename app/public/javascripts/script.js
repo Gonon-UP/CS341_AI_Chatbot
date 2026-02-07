@@ -1,5 +1,6 @@
 const input = document.getElementById("chatInput");
 const messageArea = document.getElementById("messageArea");
+const box = document.getElementById("titleArea");
 
 function addMessage(text, type = "user") {
   const msg = document.createElement("div");
@@ -21,7 +22,7 @@ function sendMessage() {
 
   // fake bot reply (optional test)
   setTimeout(() => {
-    addMessage("Bot reply here 🤖", "bot");
+    addMessage("Bot reply here!", "bot");
   }, 500);
 }
 
@@ -31,4 +32,13 @@ input.addEventListener("keydown", (e) => {
     e.preventDefault();
     sendMessage();
   }
-});
+
+  const box = document.querySelector(".text-box");
+})
+
+box.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();      // stop newline
+    box.blur();              // exits the box (removes focus)
+  }
+})
