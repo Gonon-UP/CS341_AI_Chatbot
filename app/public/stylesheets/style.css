@@ -102,6 +102,17 @@ body {
   flex: 1;
   min-height: 0;
   min-width: 0;
+  align-items: center;
+  padding: 10px;
+}
+
+.chatbot-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: 10px;
 }
 
 .message-area {
@@ -253,4 +264,15 @@ body {
 
 .send-button:active {
   border: 1px solid white;
+}
+
+.drive-btn {
+  width: 80%;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--border-color);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font: inherit;
 }
