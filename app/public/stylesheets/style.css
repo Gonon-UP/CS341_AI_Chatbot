@@ -1,3 +1,4 @@
+/* Defined hex colors */
 :root {
   --background-color: #31234b;
   --element-color: #261c39;
@@ -13,65 +14,11 @@ body {
   font-family: sans-serif;
 }
 
-.page {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+/******************************************************/
+/***************** INHERITED ELEMENTS *****************/
+/******************************************************/
 
-.title {
-  color: var(--title-color);
-  background: var(--background-color);
-  padding-top: 15px;
-  padding-right: 15px;
-  padding-left: 30px;
-  resize: none;
-  font-size: 30px;
-  font-weight: bold;
-  border: none;
-}
-
-.title::placeholder {
-  color: #c5c5c5;
-  opacity: 1;
-  transition: color 0.3s ease;
-}
-
-.title:hover::placeholder {
-  color: white;
-}
-
-.title:focus {
-  outline: none;
-}
-
-.row {
-  flex: 1;
-  display: flex;
-
-  padding: 15px;
-  gap: 20px;
-
-  box-sizing: border-box;
-  min-height: 0;
-  min-width: 0;
-}
-
-.left-container, .right-container {
-  flex: 1;
-  display: flex;
-  flex-direction: column; /* stack vertically */
-  gap: 16px;
-}
-
-.chatbot-container {
-  flex: 2;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-}
-
+/* CHILD - all 5 panels inherit from this */
 .child {
   flex: 1;
   background: var(--element-color);
@@ -106,6 +53,136 @@ body {
   padding: 10px;
 }
 
+/* CUSTOM BUTTON - most buttons inherit from this */
+.custom-button {
+  width: 100%;
+  height: 43px;
+  border-radius: 12px; /* Makes it circular */
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font: inherit;
+  
+  /* Lighter purple than the dark background */
+  background-color: var(--background-color); 
+  color: white; /* Darker text for contrast */
+  
+  /* Smoothly fades the color over 0.3 seconds */
+  transition: background-color 0.3s ease;
+  transition: border-color 0.3s ease;
+}
+
+.custom-botton:hover {
+  /* Fades to a light whitish purple */
+  background-color: var(--highlight-color);
+}
+
+.custom-button:active {
+  border: 1px solid white;
+}
+
+/**************************************************/
+/****************** GENERAL PAGE ******************/
+/**************************************************/
+
+/* Containers for page -> title, row (contains 3 sub-containers) */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  color: var(--title-color);
+  background: var(--background-color);
+  padding-top: 15px;
+  padding-right: 15px;
+  padding-left: 30px;
+  resize: none;
+  font-size: 30px;
+  font-weight: bold;
+  border: none;
+}
+
+.title::placeholder {
+  color: #bababa;
+  opacity: 1;
+  transition: color 0.3s ease;
+}
+
+.title:hover::placeholder {
+  color: white;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.row {
+  flex: 1;
+  display: flex;
+
+  padding: 15px;
+  gap: 20px;
+
+  box-sizing: border-box;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Left and Right containers (have separate functions) */
+.left-container, .right-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 16px;
+} 
+
+/**************************************************/
+/******************* LEFT PANELS ******************/
+/**************************************************/
+
+/* Sources panel */
+#sourcesPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 10px;
+}
+
+.drive-status {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+}
+
+/* Meetings panel */
+#meetingsPanel {
+  /* Not yet implemented */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/**************************************************/
+/****************** CHAT PANEL ********************/
+/**************************************************/
+
+/* Contains the actual Chatbot features */
+.chatbot-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
 .chatbot-content {
   display: flex;
   flex-direction: column;
@@ -126,15 +203,14 @@ body {
   gap: 10px;
 }
 
-.message-area,
-.text-box {
+.message-area, .text-box {
   scrollbar-width: thin; /* Firefox */
   scrollbar-color: var(--border-color) var(--element-color);
 }
 
-/* Chrome / Edge / Safari */
 .message-area::-webkit-scrollbar,
 .text-box::-webkit-scrollbar {
+  /* For Chrome / Edge / Safari */
   width: 8px;
 }
 
@@ -186,6 +262,7 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Container for textbox and send button */
 .input-container {
   display: flex;
   align-items: flex-end;
@@ -237,42 +314,27 @@ body {
   background-color: var(--highlight-color);
 }
 
-.send-button {
+#sendButton {
+  /* Has unique width */
   width: 43px;
-  height: 43px;
-  border-radius: 50%; /* Makes it circular */
-  border: 1px solid var(--border-color);
-  cursor: pointer;
+}
+
+/**************************************************/
+/****************** RIGHT PANELS ******************/
+/**************************************************/
+
+/* Topics panel */
+#topicsPanel {
+  /* Not yet implemented */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  
-  /* Lighter purple than the dark background */
-  background-color: var(--background-color); 
-  color: white; /* Darker text for contrast */
-  
-  /* Smoothly fades the color over 0.3 seconds */
-  transition: background-color 0.3s ease;
-  transition: border-color 0.3s ease;
+  flex-direction: column;
+  height: 100%;
 }
 
-.send-button:hover {
-  /* Fades to a light whitish purple */
-  background-color: var(--highlight-color);
-}
-
-.send-button:active {
-  border: 1px solid white;
-}
-
-.drive-btn {
-  width: 80%;
-  padding: 10px;
-  border-radius: 12px;
-  background: var(--border-color);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font: inherit;
+/* Tasks panel */
+#tasksPanel {
+  /* Not yet implemented */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }

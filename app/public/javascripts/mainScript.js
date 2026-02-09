@@ -1,6 +1,15 @@
-const input = document.getElementById("chatInput");
-const messageArea = document.getElementById("messageArea");
 const titleArea = document.getElementById("titleArea");
+const messageArea = document.getElementById("messageArea");
+const textArea = document.getElementById("textBox");
+const sendBtn = document.getElementById("sendButton"); 
+
+// Title textbox at top of page
+titleArea.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();      // stop newline
+    titleArea.blur();        // exits the box (removes focus)
+  }
+})
 
 // adds messages to the messageArea (display)
 function addMessage(text, type = "user") {
@@ -16,18 +25,14 @@ function addMessage(text, type = "user") {
 
 // sends messages somewhere (implement better later)
 async function sendMessage() {
-    const input = document.getElementById("chatInput");
-    const button = document.querySelector(".send-button");
-    const messageArea = document.getElementById("messageArea");
+    if (!textArea.value.trim()) return;
 
-    if (!input.value.trim()) return;
+    // Disable textArea & button while bot responds
+    textArea.disabled = true;
+    sendBtn.disabled = true;
 
-    // Disable input & button while bot responds
-    input.disabled = true;
-    button.disabled = true;
-
-    const userQuery = input.value;
-    input.value = "";
+    const userQuery = textArea.value;
+    textArea.value = "";
 
     // Show user message using your bubble function
     addMessage(userQuery, "user");
@@ -48,11 +53,16 @@ async function sendMessage() {
     } catch (err) {
         console.error(err);
     } finally {
-        // Re-enable input & button
-        input.disabled = false;
-        button.disabled = false;
-        input.focus();
+        // Re-enable textArea & sendBtn
+        textArea.disabled = false;
+        sendBtn.disabled = false;
+        textArea.focus();
     }
+}
+
+// Called by "+ Add Web Sources"
+async function addSources() {
+  // Not implemented yet, should allow the user to search the web
 }
 
 // Example async bot function
@@ -64,18 +74,22 @@ async function getBotReply(query) {
 }
 
 /* Enter key support */
-input.addEventListener("keydown", (e) => {
+textArea.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
+
+    // Make button light up when textArea sends a message
+    const originalColor = sendBtn.style.borderColor;
+  
+    // Change to highlight color (triggers transition)
+    sendBtn.style.borderColor = 'white'; 
+
+    setTimeout(() => {
+      // Revert to original (triggers transition back)
+      sendBtn.style.borderColor = originalColor;
+    }, 200);
   }
 
   const box = document.querySelector(".text-box");
-})
-
-titleArea.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();      // stop newline
-    titleArea.blur();              // exits the box (removes focus)
-  }
 })

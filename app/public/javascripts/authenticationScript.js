@@ -20,6 +20,10 @@ window.addEventListener("load", () => {
             const btn = document.getElementById("googleDriveLogin");
             btn.style.display = "none";
 
+            // Show the details of the Google Drive
+            const status = document.getElementById("driveStatus");
+            status.style.display = "block";
+
             listDriveFiles();
         }
     });
