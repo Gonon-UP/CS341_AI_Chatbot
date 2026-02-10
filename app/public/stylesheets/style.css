@@ -1,8 +1,340 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/* Defined hex colors */
+:root {
+  --background-color: #31234b;
+  --element-color: #261c39;
+  --border-color: #4d3b6b;
+  --highlight-color: #3d2b5d;
+  --title-color: #ffffff;
+  --element-title-color: #d4d4d4;
 }
 
-a {
-  color: #00B7FF;
+body {
+  margin: 0;
+  background-color: var(--background-color);
+  font-family: sans-serif;
+}
+
+/******************************************************/
+/***************** INHERITED ELEMENTS *****************/
+/******************************************************/
+
+/* CHILD - all 5 panels inherit from this */
+.child {
+  flex: 1;
+  background: var(--element-color);
+  color: var(--element-title-color);
+  /* 1. Change padding to 0 so the input can actually reach the bottom */
+  padding: 0; 
+  border-radius: 20px;
+  box-shadow: 0 2px 8px #00000020;
+  
+  /* 2. Add these to make the child a flex column */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Keeps input corners from poking out */
+  min-height: 0;
+  min-width: 0;
+}
+
+.child-header {
+  /* 3. Add padding back here so the text isn't touching the edges */
+  padding: 15px; 
+  font-weight: bold;
+  border-bottom: 1px solid var(--background-color);
+}
+
+.child-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  align-items: center;
+  padding: 10px;
+}
+
+/* CUSTOM BUTTON - most buttons inherit from this */
+.custom-button {
+  width: 100%;
+  height: 43px;
+  border-radius: 12px; /* Makes it circular */
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font: inherit;
+  
+  /* Lighter purple than the dark background */
+  background-color: var(--background-color); 
+  color: white; /* Darker text for contrast */
+  
+  /* Smoothly fades the color over 0.3 seconds */
+  transition: background-color 0.3s ease;
+  transition: border-color 0.3s ease;
+}
+
+.custom-botton:hover {
+  /* Fades to a light whitish purple */
+  background-color: var(--highlight-color);
+}
+
+.custom-button:active {
+  border: 1px solid white;
+}
+
+/**************************************************/
+/****************** GENERAL PAGE ******************/
+/**************************************************/
+
+/* Containers for page -> title, row (contains 3 sub-containers) */
+.page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  color: var(--title-color);
+  background: var(--background-color);
+  padding-top: 15px;
+  padding-right: 15px;
+  padding-left: 30px;
+  resize: none;
+  font-size: 30px;
+  font-weight: bold;
+  border: none;
+}
+
+.title::placeholder {
+  color: #bababa;
+  opacity: 1;
+  transition: color 0.3s ease;
+}
+
+.title:hover::placeholder {
+  color: white;
+}
+
+.title:focus {
+  outline: none;
+}
+
+.row {
+  flex: 1;
+  display: flex;
+
+  padding: 15px;
+  gap: 20px;
+
+  box-sizing: border-box;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Left and Right containers (have separate functions) */
+.left-container, .right-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* stack vertically */
+  gap: 16px;
+} 
+
+/**************************************************/
+/******************* LEFT PANELS ******************/
+/**************************************************/
+
+/* Sources panel */
+#sourcesPanel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 10px;
+}
+
+.drive-status {
+  width: 100%;
+  cursor: pointer;
+  display: flex;
+  align-items: left;
+  justify-content: left;
+}
+
+/* Meetings panel */
+#meetingsPanel {
+  /* Not yet implemented */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/**************************************************/
+/****************** CHAT PANEL ********************/
+/**************************************************/
+
+/* Contains the actual Chatbot features */
+.chatbot-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.chatbot-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: 10px;
+}
+
+.message-area {
+  flex: 1 1 0%;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 15px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message-area, .text-box {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border-color) var(--element-color);
+}
+
+.message-area::-webkit-scrollbar,
+.text-box::-webkit-scrollbar {
+  /* For Chrome / Edge / Safari */
+  width: 8px;
+}
+
+.message-area::-webkit-scrollbar-track,
+.text-box::-webkit-scrollbar-track {
+  background: var(--element-color);
+  border-radius: 10px;
+}
+
+.message-area::-webkit-scrollbar-thumb,
+.text-box::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.message-area::-webkit-scrollbar-thumb:hover,
+.text-box::-webkit-scrollbar-thumb:hover {
+  background: var(--highlight-color);
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-spacing: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  animation: fadeIn 0.15s ease;
+}
+
+.message.user {
+  align-self: flex-end;
+  background: var(--highlight-color);
+  color: white;
+  border-radius: 20px;
+  border-bottom-right-radius: 0px;
+}
+
+.message.bot {
+  align-self: flex-start;
+  background: var(--element-color);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  border-bottom-left-radius: 0px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Container for textbox and send button */
+.input-container {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 15px;
+  
+  /* 4. THE SECOND FIX: Lock the container's width */
+  width: 100%;
+  max-width: 100%;      /* Absolute limit */
+  box-sizing: border-box;
+  flex-shrink: 0;       /* Prevents the footer from squishing vertically */
+  
+  border-top: 1px solid var(--background-color);
+}
+
+.text-box {
+  /* 1. THE CRITICAL FIX: Force the box to ignore text-length for width */
+  flex: 1 1 0;          /* Grow and shrink from a baseline of 0 */
+  width: 0;             /* Tells the browser: "Don't get your width from the text" */
+  min-width: 0;         /* Allows it to be smaller than default textarea size */
+  
+  /* 2. Vertical Growth Logic */
+  field-sizing: content;
+  overflow-wrap: break-word; /* Forces long words to break rather than push */
+  
+  /* 3. Existing styling */
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--background-color);
+  color: white;
+  font: inherit;
+  border: 1px solid var(--border-color);
+  outline: none;
+  resize: none;
+  min-height: 42px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
+
+.text-box:focus {
+  border-color: white;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.text-box:hover {
+  background-color: var(--highlight-color);
+}
+
+#sendButton {
+  /* Has unique width */
+  width: 43px;
+}
+
+/**************************************************/
+/****************** RIGHT PANELS ******************/
+/**************************************************/
+
+/* Topics panel */
+#topicsPanel {
+  /* Not yet implemented */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Tasks panel */
+#tasksPanel {
+  /* Not yet implemented */
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
