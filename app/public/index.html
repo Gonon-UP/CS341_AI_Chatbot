@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!-- INITIAL DEVELOPMENT OF WEBSITE -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Name of browser and necesary .css file -->
+    <title>Research Chatbot</title>
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <!-- Google itentity services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <!-- Container to separate Title and Row (where element are displayed) -->
+    <div class="page">
+        <textarea class="title" id="titleArea" placeholder="Notebook Title"
+                  maxlength="50" rows="1"></textarea>
+
+        <!-- Displays 3 sections (left, middle, right columns)
+             with 25%, 50%, 25% of page width, respectively -->
+        <div class="row">
+            <!-- Left column for Sources and Previous Meetings -->
+            <div class="left-container">
+                <div class="child">
+                    <div class="child-header">Sources</div>
+
+                    <div class="child-content" id="sourcesPanel">
+                        <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
+
+                        <!-- IN ORDER TO SIGN IN: YOU NEED TO ADD TEST USERS -->
+                        <!-- BEFORE SUBMISSION TO THE CLIENT, PUBLISH WEB IN "AUDIENCE" -->
+                        <button class="custom-button" id="googleDriveLogin" >Connect Google Drive</button>
+
+                        <div class="drive-status" id="driveStatus" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="child">
+                    <div class="child-header">Previous Meetings</div>
+
+                    <div class="child-content" id="meetingsPanel"></div>
+                </div>
+            </div>
+
+            <!-- Middle column for ChatBot -->
+            <div class="chatbot-container">
+                <div class="child">
+                    <div class="child-header">Chatbot</div>
+
+                    <div class="chatbot-content">
+                        <!-- Where the texts back and forth go -->
+                        <div class="message-area" id="messageArea"></div>
+
+                        <!-- Contains the text box and send button -->
+                        <div class="input-container">
+                            <textarea class="text-box" id="textBox" placeholder="Ask a question..." rows="1"></textarea>
+
+                            <button id="sendButton" class="custom-button" onclick="sendMessage()">→</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column for Topics and Upcoming Tasks -->
+            <div class="right-container">
+                <div class="child">
+                    <div class="child-header">Topics</div>
+
+                    <div class="child-content" id="topicsPanel"></div>
+                </div>
+
+                <div class="child">
+                    <div class="child-header">Upcoming Tasks</div>
+                    
+                    <div class="child-content" id="tasksPanel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<!-- JavaScript files (separate script for Google Authentication) -->
+<script src="javascripts/mainScript.js"></script>
+<script src="javascripts/authenticationScript.js"></script>
+
+</html>
