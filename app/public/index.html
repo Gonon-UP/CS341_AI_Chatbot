@@ -7,9 +7,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- Name of browser and necesary .css file -->
+    <!-- Name of browser and necessary .css file -->
     <title>Research Chatbot</title>
     <link rel="stylesheet" href="stylesheets/style.css">
+    <link rel="stylesheet" href="stylesheets/popupStyle.css">
 
     <!-- Google itentity services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -31,6 +32,7 @@
 
                     <div class="child-content" id="sourcesPanel">
                         <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
+                        <!-- <div id="sourcesList" class="sources-list"></div> -->
 
                         <!-- IN ORDER TO SIGN IN: YOU NEED TO ADD TEST USERS -->
                         <!-- BEFORE SUBMISSION TO THE CLIENT, PUBLISH WEB IN "AUDIENCE" -->
@@ -39,6 +41,8 @@
                         <div class="drive-status" id="driveStatus" style="display: none;"></div>
                     </div>
                 </div>
+
+                <div id="searchResults" class="search-results"></div>
 
                 <div class="child">
                     <div class="child-header">Previous Meetings</div>
@@ -87,5 +91,15 @@
 <!-- JavaScript files (separate script for Google Authentication) -->
 <script src="javascripts/mainScript.js"></script>
 <script src="javascripts/authenticationScript.js"></script>
+
+<div id="popupOverlay" class="popup-overlay">
+    <iframe
+        id="popupFrame"
+        src=""
+        frameborder="0"
+        style="width: 420px; height: 260px; border-radius: 16px; background: white;">
+    </iframe>
+</div>
+
 
 </html>

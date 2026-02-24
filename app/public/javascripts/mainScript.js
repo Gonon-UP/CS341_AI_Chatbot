@@ -60,11 +60,6 @@ async function sendMessage() {
     }
 }
 
-// Called by "+ Add Web Sources"
-async function addSources() {
-  // Not implemented yet, should allow the user to search the web
-}
-
 // Example async bot function
 async function getBotReply(query) {
     // Replace this with your actual bot API call
@@ -93,3 +88,122 @@ textArea.addEventListener("keydown", (e) => {
 
   const box = document.querySelector(".text-box");
 })
+
+async function addSources() {
+    const overlay = document.getElementById("popupOverlay");
+
+    const response = await fetch("popups/addSources.html");
+    const html = await response.text();
+
+    overlay.innerHTML = html;
+    overlay.style.display = "flex";
+
+    // Existing listeners
+    overlay.querySelector("#addBtn").addEventListener("click", saveSource);
+    overlay.querySelector("#cancelBtn").addEventListener("click", closePopup);
+
+    // 🔥 NEW: Search listeners
+    const searchBox = overlay.querySelector("#webSearch");
+    const searchBtn = overlay.querySelector("#searchBtn");
+
+    searchBtn.addEventListener("click", performSearch);
+
+    searchBox.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            performSearch();
+        }
+    });
+}
+
+async function performSearch() {
+    const overlay = document.getElementById("popupOverlay");
+    const query = overlay.querySelector("#webSearch").value.trim();
+    const resultsContainer = overlay.querySelector("#searchResults");
+
+    if (!query) return;
+
+    resultsContainer.innerHTML = "Searching...";
+
+    try {
+        const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        resultsContainer.innerHTML = "";
+
+        data.forEach(result => {
+            const card = document.createElement("div");
+            card.className = "result-card";
+
+            card.innerHTML = `
+                <a href="${result.link}" target="_blank" class="result-title">
+                    ${result.title}
+                </a>
+                <div class="result-snippet">${result.snippet}</div>
+            `;
+
+            resultsContainer.appendChild(card);
+        });
+
+    } catch (err) {
+        resultsContainer.innerHTML = "Search failed.";
+    }
+}
+
+// Close popup function
+function closePopup() {
+    const overlay = document.getElementById("popupOverlay");
+    overlay.style.display = "none";
+    overlay.innerHTML = ""; // clear content
+}
+
+// Save source function
+async function saveSource() {
+    const input = document.getElementById("sourceInput");
+    const url = input.value.trim();
+    if (!url) return;
+
+    let pageTitle = url; // fallback
+
+    try {
+        // Try to fetch the page HTML to get <title>
+        const response = await fetch(url, { mode: 'cors' });
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, "text/html");
+        pageTitle = doc.querySelector("title")?.innerText || url;
+    } catch (err) {
+        console.warn("Could not fetch title, using URL instead.");
+    }
+
+    // Create a source box
+    const panel = document.getElementById("sourcesPanel");
+    const box = document.createElement("div");
+    box.className = "source-box";
+
+    // Add title text
+    const text = document.createElement("span");
+    text.textContent = pageTitle;
+
+    // Add remove button
+    const removeBtn = document.createElement("button");
+    removeBtn.textContent = "×"; // X character
+    removeBtn.className = "remove-source";
+    removeBtn.onclick = () => box.remove(); // remove the box when clicked
+
+    box.appendChild(text);
+    box.appendChild(removeBtn);
+
+    // Insert the new source box **after the button**
+    const addBtn = panel.querySelector(".custom-button");
+    panel.insertBefore(box, addBtn.nextSibling);
+
+    // Clear input and close popup
+    input.value = "";
+    closePopup();
+}
+
+// Optional: click outside popup to close
+document.getElementById("popupOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "popupOverlay") closePopup();
+});

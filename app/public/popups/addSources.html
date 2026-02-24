@@ -1,0 +1,17 @@
+<div class="popup">
+    <h2>Add Web Source</h2>
+    <div class="search-container">
+        <input 
+            type="text"
+            class="search-input"
+            id="webSearch"
+            placeholder="Search the web..."
+        />
+        <button onclick="performSearch()">Search</button>
+    </div>
+
+    <div id="searchResults"></div>
+
+    <button class="custom-button" onclick="window.parent.saveSource()">Add</button>
+    <button class="custom-button cancel" onclick="window.parent.closePopup()">Cancel</button>
+</div>
