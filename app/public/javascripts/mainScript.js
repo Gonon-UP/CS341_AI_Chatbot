@@ -127,6 +127,7 @@ async function addSources() {
 /* saves the sources in the SourcesList div */
 async function saveSource(preFetchedTitle = null, directUrl = null) {
     const url = directUrl || document.getElementById("sourceInput").value.trim();
+    const favicon = "";
     if (!url) return;
 
     const pageTitle = preFetchedTitle || url;
@@ -136,6 +137,7 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
     const box = document.createElement("div");
     box.className = "source-box";
     box.innerHTML = `
+        <img src="${url}/favicon.ico" alt="alternatetext"> 
         <span>
             <a href="${url}" target="_blank">${pageTitle}</a>
         </span>
