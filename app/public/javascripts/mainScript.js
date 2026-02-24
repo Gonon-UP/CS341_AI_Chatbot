@@ -3,7 +3,7 @@ const messageArea = document.getElementById("messageArea");
 const textArea = document.getElementById("textBox");
 const sendBtn = document.getElementById("sendButton"); 
 
-// Title textbox at top of page
+/* Title textbox at top of page */
 titleArea.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();      // stop newline
@@ -11,7 +11,7 @@ titleArea.addEventListener("keydown", (e) => {
   }
 })
 
-// adds messages to the messageArea (display)
+/* Adds messages to the Chatbot (display) */
 function addMessage(text, type = "user") {
   const msg = document.createElement("div");
   msg.className = `message ${type}`;
@@ -23,7 +23,7 @@ function addMessage(text, type = "user") {
   messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-// sends messages somewhere (implement better later)
+/* Sends messages to Chatbot */
 async function sendMessage() {
     if (!textArea.value.trim()) return;
 
@@ -60,7 +60,7 @@ async function sendMessage() {
     }
 }
 
-// Example async bot function
+/* Chatbot reply function, not implemented yet */
 async function getBotReply(query) {
     // Replace this with your actual bot API call
     return new Promise(resolve => {
@@ -68,7 +68,7 @@ async function getBotReply(query) {
     });
 }
 
-/* Enter key support */
+/* Extra highlight feature for aesthetics */
 textArea.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -89,6 +89,7 @@ textArea.addEventListener("keydown", (e) => {
   const box = document.querySelector(".text-box");
 })
 
+/* saveSources(), called by "Add Web Sources" button */
 async function addSources() {
     const overlay = document.getElementById("popupOverlay");
 
@@ -123,6 +124,7 @@ async function addSources() {
     });
 }
 
+/* saves the sources in the SourcesList div */
 async function saveSource(preFetchedTitle = null, directUrl = null) {
     const url = directUrl || document.getElementById("sourceInput").value.trim();
     if (!url) return;
@@ -145,13 +147,14 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
     closePopup();
 }
 
-// Close popup function
+/* Close popup function */
 function closePopup() {
     const overlay = document.getElementById("popupOverlay");
     overlay.style.display = "none";
     overlay.innerHTML = ""; // clear content
 }
 
+/* Use Brave API to search the web */
 async function performSearch() {
     const overlay = document.getElementById("popupOverlay");
     const query = overlay.querySelector("#webSearch").value.trim();
@@ -167,8 +170,9 @@ async function performSearch() {
 
         data.forEach(result => {
             const card = document.createElement("div");
-            card.className = "result-card"; // This creates the missing div
+            card.className = "result-card";
 
+            // HTML for the saves sources in the Sources panel (needs work)
             card.innerHTML = `
                 <div class="result-header">
                     <a href="${result.link}" target="_blank" class="result-title">${result.title}</a>
@@ -187,6 +191,7 @@ async function performSearch() {
     }
 }
 
+/* Adds result to ResultsList */
 function selectSearchResult(url, title) {
     // 1. Find the input where saveSource expects the URL
     // (Ensure your popup HTML has <input id="sourceInput">)
