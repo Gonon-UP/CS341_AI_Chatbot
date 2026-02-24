@@ -7,57 +7,54 @@ const router = express.Router();
 // GET /search?q=...
 router.get('/search', async (req, res) => {
   const query = req.query.q;
+  
+  // 1. Define the variable from process.env
+  const braveKey = process.env.BRAVE_API_KEY;
 
-  // 1️⃣ Check that query exists
   if (!query || query.trim() === "") {
     return res.status(400).json({ error: "No query provided" });
   }
 
-  // 2️⃣ Check that Google API credentials exist
-  const apiKey = process.env.GOOGLE_API_KEY;
-  const cx = process.env.GOOGLE_CX;
-
-  if (!apiKey || !cx) {
-    console.error("Missing GOOGLE_API_KEY or GOOGLE_CX");
-    return res.status(500).json({
-      error: "Server misconfiguration: Google API key or CX missing"
-    });
+  // 2. Now the check works because braveKey is defined
+  if (!braveKey) {
+    console.error("Missing BRAVE_API_KEY in .env");
+    return res.status(500).json({ error: "Server misconfiguration: Key missing" });
   }
 
-  // 3️⃣ Log request parameters for debugging
-  console.log("Search params:", { key: apiKey, cx, q: query, num: 5 });
-
   try {
-    // 4️⃣ Make request to Google Custom Search
-    const response = await axios.get(
-      "https://www.googleapis.com/customsearch/v1",
-      {
-        params: {
-          key: apiKey,
-          cx: cx,
-          q: query,
-          num: 5 // number of results
+    // 3. Added the full path to the URL
+    const response = await axios.get("https://api.search.brave.com/res/v1/web/search", {
+        params: { 
+            q: query, 
+            count: 5 
         },
-        timeout: 5000 // optional: avoid hanging requests
-      }
-    );
+        headers: {
+            // Using .trim() to ensure no hidden spaces from .env break the token
+            'X-Subscription-Token': braveKey.trim(),
+            'Accept': 'application/json'
+        }
+    });
 
-    // 5️⃣ Map results
-    const results = (response.data.items || []).map(item => ({
+    // 4. Map the results safely
+    const results = (response.data.web?.results || []).map(item => ({
       title: item.title,
-      link: item.link,
-      snippet: item.snippet
+      link: item.url,
+      snippet: item.description
     }));
 
     res.json(results);
 
   } catch (error) {
-    // 6️⃣ Print full error from Google API
-    console.error("Search error full:", error.response?.data || error.message);
-    res.status(500).json({
-      error: error.response?.data || "Search failed"
-    });
+    if (error.response) {
+        // This will now show the EXACT reason Brave rejects the request
+        console.error("BRAVE ERROR DATA:", error.response.data);
+        console.error("BRAVE STATUS:", error.response.status);
+    } else {
+        console.error("SERVER ERROR:", error.message);
+    }
+    res.status(500).json({ error: "Search failed" });
   }
 });
+
 
 module.exports = router;

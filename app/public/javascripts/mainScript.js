@@ -98,22 +98,53 @@ async function addSources() {
     overlay.innerHTML = html;
     overlay.style.display = "flex";
 
-    // Existing listeners
-    overlay.querySelector("#addBtn").addEventListener("click", saveSource);
+    // 1. Basic Popup Buttons
+    overlay.querySelector("#addBtn").addEventListener("click", () => saveSource());
     overlay.querySelector("#cancelBtn").addEventListener("click", closePopup);
 
-    // 🔥 NEW: Search listeners
-    const searchBox = overlay.querySelector("#webSearch");
-    const searchBtn = overlay.querySelector("#searchBtn");
+    // 2. Search Box Setup
+    const resultsContainer = overlay.querySelector("#searchResults");
 
-    searchBtn.addEventListener("click", performSearch);
-
-    searchBox.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            performSearch();
+    resultsContainer.addEventListener("click", (e) => {
+        const btn = e.target.closest(".select-result-btn");
+        if (btn) {
+            const url = btn.getAttribute("data-url");
+            const title = btn.getAttribute("data-title");
+            
+            // Fill the input and trigger your existing save logic
+            const sourceInput = overlay.querySelector("#sourceInput");
+            if (sourceInput) {
+                sourceInput.value = url;
+                saveSource(title); // Pass title to skip fetching it again
+            }
         }
     });
+}
+
+async function saveSource(preFetchedTitle = null) {
+    const input = document.getElementById("sourceInput");
+    const url = input.value.trim();
+    if (!url) return;
+
+    // Use the title from the search if we have it, otherwise fallback to URL
+    let pageTitle = preFetchedTitle || url;
+
+    // Create the source box in your sidebar
+    const panel = document.getElementById("sourcesPanel");
+    const box = document.createElement("div");
+    box.className = "source-box";
+    box.innerHTML = `
+        <span>${pageTitle}</span>
+        <button class="remove-source" onclick="this.parentElement.remove()">×</button>
+    `;
+
+    // Insert into your side panel
+    const addBtn = panel.querySelector(".custom-button");
+    panel.insertBefore(box, addBtn.nextSibling);
+
+    // Clean up
+    input.value = "";
+    closePopup();
 }
 
 async function performSearch() {
@@ -122,88 +153,47 @@ async function performSearch() {
     const resultsContainer = overlay.querySelector("#searchResults");
 
     if (!query) return;
-
     resultsContainer.innerHTML = "Searching...";
 
     try {
         const response = await fetch(`/search?q=${encodeURIComponent(query)}`);
         const data = await response.json();
-
         resultsContainer.innerHTML = "";
 
         data.forEach(result => {
             const card = document.createElement("div");
-            card.className = "result-card";
+            card.className = "result-card"; // This creates the missing div
 
             card.innerHTML = `
-                <a href="${result.link}" target="_blank" class="result-title">
-                    ${result.title}
-                </a>
+                <div class="result-header">
+                    <a href="${result.link}" target="_blank" class="result-title">${result.title}</a>
+                    <button class="select-result-btn" 
+                            data-url="${result.link}" 
+                            data-title="${result.title.replace(/'/g, "\\'")}">
+                        Select
+                    </button>
+                </div>
                 <div class="result-snippet">${result.snippet}</div>
             `;
-
             resultsContainer.appendChild(card);
         });
-
     } catch (err) {
         resultsContainer.innerHTML = "Search failed.";
     }
 }
 
-// Close popup function
-function closePopup() {
-    const overlay = document.getElementById("popupOverlay");
-    overlay.style.display = "none";
-    overlay.innerHTML = ""; // clear content
-}
-
-// Save source function
-async function saveSource() {
-    const input = document.getElementById("sourceInput");
-    const url = input.value.trim();
-    if (!url) return;
-
-    let pageTitle = url; // fallback
-
-    try {
-        // Try to fetch the page HTML to get <title>
-        const response = await fetch(url, { mode: 'cors' });
-        const htmlText = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, "text/html");
-        pageTitle = doc.querySelector("title")?.innerText || url;
-    } catch (err) {
-        console.warn("Could not fetch title, using URL instead.");
+function selectSearchResult(url, title) {
+    // 1. Find the input where saveSource expects the URL
+    // (Ensure your popup HTML has <input id="sourceInput">)
+    const sourceInput = document.getElementById("sourceInput");
+    
+    if (sourceInput) {
+        sourceInput.value = url;
+        
+        // 2. Trigger your existing saveSource function 
+        // Passing the title directly so it skips the slow fetch()
+        saveSource(title); 
+    } else {
+        console.error("Could not find sourceInput element in the popup");
     }
-
-    // Create a source box
-    const panel = document.getElementById("sourcesPanel");
-    const box = document.createElement("div");
-    box.className = "source-box";
-
-    // Add title text
-    const text = document.createElement("span");
-    text.textContent = pageTitle;
-
-    // Add remove button
-    const removeBtn = document.createElement("button");
-    removeBtn.textContent = "×"; // X character
-    removeBtn.className = "remove-source";
-    removeBtn.onclick = () => box.remove(); // remove the box when clicked
-
-    box.appendChild(text);
-    box.appendChild(removeBtn);
-
-    // Insert the new source box **after the button**
-    const addBtn = panel.querySelector(".custom-button");
-    panel.insertBefore(box, addBtn.nextSibling);
-
-    // Clear input and close popup
-    input.value = "";
-    closePopup();
 }
-
-// Optional: click outside popup to close
-document.getElementById("popupOverlay").addEventListener("click", (e) => {
-    if (e.target.id === "popupOverlay") closePopup();
-});
