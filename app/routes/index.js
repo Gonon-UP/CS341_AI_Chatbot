@@ -26,7 +26,7 @@ router.get('/search', async (req, res) => {
     const response = await axios.get("https://api.search.brave.com/res/v1/web/search", {
         params: { 
             q: query, 
-            count: 5 
+            count: 10 
         },
         headers: {
             // Using .trim() to ensure no hidden spaces from .env break the token

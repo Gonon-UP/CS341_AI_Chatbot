@@ -98,53 +98,58 @@ async function addSources() {
     overlay.innerHTML = html;
     overlay.style.display = "flex";
 
-    // 1. Basic Popup Buttons
-    overlay.querySelector("#addBtn").addEventListener("click", () => saveSource());
-    overlay.querySelector("#cancelBtn").addEventListener("click", closePopup);
-
-    // 2. Search Box Setup
     const resultsContainer = overlay.querySelector("#searchResults");
+    const searchInput = overlay.querySelector("#webSearch");
+
+    searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            performSearch();   // no need for window.parent here
+        }
+    });
+
+    console.log("resultsContainer:", resultsContainer);
 
     resultsContainer.addEventListener("click", (e) => {
         const btn = e.target.closest(".select-result-btn");
         if (btn) {
-            const url = btn.getAttribute("data-url");
-            const title = btn.getAttribute("data-title");
-            
-            // Fill the input and trigger your existing save logic
-            const sourceInput = overlay.querySelector("#sourceInput");
-            if (sourceInput) {
-                sourceInput.value = url;
-                saveSource(title); // Pass title to skip fetching it again
-            }
+            const url = btn.dataset.url;
+            const title = btn.dataset.title;
+
+            console.log("Clicked Select:", title, url);
+
+            saveSource(title, url);
         }
     });
 }
 
-async function saveSource(preFetchedTitle = null) {
-    const input = document.getElementById("sourceInput");
-    const url = input.value.trim();
+async function saveSource(preFetchedTitle = null, directUrl = null) {
+    const url = directUrl || document.getElementById("sourceInput").value.trim();
     if (!url) return;
 
-    // Use the title from the search if we have it, otherwise fallback to URL
-    let pageTitle = preFetchedTitle || url;
+    const pageTitle = preFetchedTitle || url;
 
-    // Create the source box in your sidebar
-    const panel = document.getElementById("sourcesPanel");
+    const panel = document.getElementById("sourcesList");
+
     const box = document.createElement("div");
     box.className = "source-box";
     box.innerHTML = `
-        <span>${pageTitle}</span>
+        <span>
+            <a href="${url}" target="_blank">${pageTitle}</a>
+        </span>
         <button class="remove-source" onclick="this.parentElement.remove()">×</button>
     `;
 
-    // Insert into your side panel
-    const addBtn = panel.querySelector(".custom-button");
-    panel.insertBefore(box, addBtn.nextSibling);
+    panel.appendChild(box);
 
-    // Clean up
-    input.value = "";
     closePopup();
+}
+
+// Close popup function
+function closePopup() {
+    const overlay = document.getElementById("popupOverlay");
+    overlay.style.display = "none";
+    overlay.innerHTML = ""; // clear content
 }
 
 async function performSearch() {
@@ -185,15 +190,13 @@ async function performSearch() {
 function selectSearchResult(url, title) {
     // 1. Find the input where saveSource expects the URL
     // (Ensure your popup HTML has <input id="sourceInput">)
-    const sourceInput = document.getElementById("sourceInput");
-    
-    if (sourceInput) {
-        sourceInput.value = url;
-        
-        // 2. Trigger your existing saveSource function 
-        // Passing the title directly so it skips the slow fetch()
-        saveSource(title); 
-    } else {
-        console.error("Could not find sourceInput element in the popup");
-    }
+    resultsContainer.addEventListener("click", (e) => {
+        const btn = e.target.closest(".select-result-btn");
+        if (btn) {
+            const url = btn.getAttribute("data-url");
+            const title = btn.getAttribute("data-title");
+
+            saveSource(title, url);
+        }
+    });
 }
