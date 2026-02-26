@@ -128,21 +128,51 @@ async function addSources() {
 /* saves the sources in the SourcesList div */
 async function saveSource(preFetchedTitle = null, directUrl = null) {
   const url = directUrl || document.getElementById("sourceInput").value.trim();
-  const favicon = "";
   if (!url) return;
 
   const pageTitle = preFetchedTitle || url;
 
-  const panel = document.getElementById("sourcesList");
+  try {
+	  const response = await fetch("/api/save", {
+		  method: "POST",
+		  headers: { "Content-Type": "application/json" },
+		  body: JSON.stringify({
+			  page_number: 1,  // default page
+			  title: pageTitle,
+			  url: url
+		  })
+	  });
 
-  const box = document.createElement("div");
-  box.className = "source-box";
+	  const data = await reponse.json();
 
-  box.innerHTML = buildSourceCardHTML(url, pageTitle);
-  panel.appendChild(box);
+	  if(data.success) {
+		  loadSources(1),
+	  }
+  } catch (err) {
+	  console.error("Save failed:", err);
+  }
+
   closePopup();
 }
 
+async function loadSources(pageNumber) {
+	try {
+		const response = await fetch(`/api/urls/${pageNumber}`);
+		const data = await reponse.json();
+
+		const panel = document.getElementById("sourcesList");
+		panel.innerHTML = "";
+
+		data.urls.forEach(item => {
+			const box = document.createElement("div");
+			box.className = "source-box";
+			box.innerHTML = buildSourceCardHTML(item.url, item.title);
+			panel.appendChild(box);
+		});
+	} catch (err) {
+		console.error("Failed to load resources:" err);
+	}
+}
 
 /* Close popup function */
 function closePopup() {
@@ -187,3 +217,7 @@ async function performSearch() {
 window.addSources = addSources;
 window.saveSource = saveSource;
 window.performSearch = performSearch;
+
+window.addEventListener("DOMContentLoaded", () => {
+	loadSources(1);
+});
