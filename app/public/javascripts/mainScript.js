@@ -2,13 +2,16 @@ import {
   formatBotReply,
   isValidMessage,
   buildSearchUrl,
-  buildResultCardHTML
+  buildResultCardHTML,
+  buildSourceCardHTML
 } from "./chatLogic.js";
 
 const titleArea = document.getElementById("titleArea");
 const messageArea = document.getElementById("messageArea");
 const textArea = document.getElementById("textBox");
 const sendBtn = document.getElementById("sendButton"); 
+
+sendBtn.addEventListener("click", sendMessage);
 
 /* Title textbox at top of page */
 titleArea.addEventListener("keydown", (e) => {
@@ -33,7 +36,7 @@ function addMessage(text, type = "user") {
 /* Sends messages to Chatbot */
 async function sendMessage() {
 
-  // 🔥 Now uses pure validation logic
+  // Now uses pure validation logic
   if (!isValidMessage(textArea.value)) return;
 
   textArea.disabled = true;
@@ -114,12 +117,18 @@ async function addSources() {
       saveSource(title, url);
     }
   });
+
+  const closeBtn = overlay.querySelector("#closeButton");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closePopup);
+  }
 }
 
 
 /* saves the sources in the SourcesList div */
 async function saveSource(preFetchedTitle = null, directUrl = null) {
   const url = directUrl || document.getElementById("sourceInput").value.trim();
+  const favicon = "";
   if (!url) return;
 
   const pageTitle = preFetchedTitle || url;
@@ -128,13 +137,8 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
 
   const box = document.createElement("div");
   box.className = "source-box";
-  box.innerHTML = `
-    <span>
-      <a href="${url}" target="_blank">${pageTitle}</a>
-    </span>
-    <button class="remove-source" onclick="this.parentElement.remove()">×</button>
-  `;
 
+  box.innerHTML = buildSourceCardHTML(url, pageTitle);
   panel.appendChild(box);
   closePopup();
 }
@@ -159,7 +163,7 @@ async function performSearch() {
   resultsContainer.innerHTML = "Searching...";
 
   try {
-    // 🔥 Now uses pure URL builder
+    // Now uses pure URL builder
     const response = await fetch(buildSearchUrl(query));
     const data = await response.json();
 
@@ -169,7 +173,7 @@ async function performSearch() {
       const card = document.createElement("div");
       card.className = "result-card";
 
-      // 🔥 Now uses pure HTML builder
+      // Now uses pure HTML builder
       card.innerHTML = buildResultCardHTML(result);
 
       resultsContainer.appendChild(card);

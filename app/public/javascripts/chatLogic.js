@@ -27,3 +27,13 @@ export function buildResultCardHTML(result) {
     <div class="result-snippet">${result.snippet}</div>
   `;
 }
+
+export function buildSourceCardHTML(url, pageTitle) {
+  return `
+      <img src="${url}/favicon.ico" alt="alternatetext"> 
+      <span>
+          <a href="${url}" target="_blank">${pageTitle}</a>
+      </span>
+      <button class="remove-source" onclick="this.parentElement.remove()">×</button>
+  `;
+}
