@@ -6,7 +6,7 @@ router.post("/api/save", (req, res) => {
 	const { page_number, title, url } = req.body;
 
 	const getOrderQuery = `
-		SELECT INFULL(MAX(url_order), 0) + 1 AS nextOrder
+		SELECT IFNULL(MAX(url_order), 0) + 1 AS nextOrder
 		FROM urls
 		WHERE page_number = ${page_number};
 	`;
@@ -19,7 +19,7 @@ router.post("/api/save", (req, res) => {
 		const nextOrder = results[0].nextOrder;
 
 		const insertQuery = `
-			INSERT INT urls (page_number, url_order, title, url)
+			INSERT INTO urls (page_number, url_order, title, url)
 			VALUES (${page_number}, ${nextOrder},
 				'${title.replace(/'/g, "\\'")}',
 				'${url.replace(/'/g, "\\'")}');
