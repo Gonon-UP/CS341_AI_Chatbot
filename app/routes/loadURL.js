@@ -20,3 +20,5 @@ router.get("/api/urls/:pageNumber", (req, res) => {
 		res.json({ urls: results });
 	});
 });
+
+module.exports = router;

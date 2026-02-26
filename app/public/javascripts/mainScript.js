@@ -143,11 +143,12 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
 		  })
 	  });
 
-	  const data = await reponse.json();
+	  const data = await response.json();
 
 	  if(data.success) {
-		  loadSources(1),
+		  loadSources(1);
 	  }
+
   } catch (err) {
 	  console.error("Save failed:", err);
   }
@@ -158,7 +159,7 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
 async function loadSources(pageNumber) {
 	try {
 		const response = await fetch(`/api/urls/${pageNumber}`);
-		const data = await reponse.json();
+		const data = await response.json();
 
 		const panel = document.getElementById("sourcesList");
 		panel.innerHTML = "";
@@ -170,7 +171,7 @@ async function loadSources(pageNumber) {
 			panel.appendChild(box);
 		});
 	} catch (err) {
-		console.error("Failed to load resources:" err);
+		console.error("Failed to load resources:", err);
 	}
 }
 

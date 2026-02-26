@@ -34,3 +34,5 @@ router.post("/api/save", (req, res) => {
 		});
 	});
 });
+
+module.exports = router;
