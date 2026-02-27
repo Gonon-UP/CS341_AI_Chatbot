@@ -16,6 +16,9 @@ var database = "cs341s26aibot";
 var user = "cs341s26aibot";
 var password = "q*gRYF-oHf)CtWmF";
 
+// TO GET INTO MYSQL (from VM)
+// mysql -h pdx0mysql00.campus.up.edu -u cs341s26aibot -p cs341s26aibot
+
 /**
  * dbquery
  *
