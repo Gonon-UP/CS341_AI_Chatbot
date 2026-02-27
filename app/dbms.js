@@ -27,55 +27,59 @@ var password = "q*gRYF-oHf)CtWmF";
  *                   error - (or 'false' if none)
  *                   results - as given by the mysql client
  */
-exports.dbquery = function(query_str, callback) {
+exports.dbquery = function(query_str, params, callback) {
+    var dbclient;
+    var results = null;
 
-	var dbclient;
-	var results = null;
-	
-	async.waterfall([
+    // Allow function to be called with 2 arguments (query, callback)
+    if (typeof params === "function") {
+        callback = params;
+        params = [];
+    }
 
-		//Step 1: Connect to the database
-		function (callback) {
-			console.log("\n** creating connection.");
-			dbclient = mysql.createConnection({
-				host: host,
-				user: user,
-				password: password,
-				database: database,
-			});
+    async.waterfall([
 
-			dbclient.connect(callback);
-		},
+        // Step 1: Connect to the database
+        function(cb) {
+            console.log("\n** creating connection.");
+            dbclient = mysql.createConnection({
+                host: host,
+                user: user,
+                password: password,
+                database: database,
+            });
 
-		//Step 2: Issue query
-		function (results, callback) {
-			console.log("\n** retrieving data");
-			dbclient.query(query_str, callback);
-		},
+            dbclient.connect(cb);
+        },
 
-		//Step 3: Collect results
-		function (rows, fields, callback) {
-			console.log("\n** dumping data:");
-			results = rows;
-			console.log("" + rows);
-			callback(null);
-		}
+        // Step 2: Issue query
+        function(_, cb) {  // previous results ignored
+            console.log("\n** retrieving data");
+            dbclient.query(query_str, params, cb);  // <-- pass params here
+        },
 
-	],
-	// waterfall cleanup function
-	function (err, res) {
-		if (err) {
-			console.log("Database query failed.  sad");
-			console.log(err);
-			callback(err, null);
-		} else {
-			console.log("Database query completed.");
-			callback(false, results);
-		}
+        // Step 3: Collect results
+        function(rows, fields, cb) {
+            console.log("\n** dumping data:");
+            results = rows;
+            console.log("" + rows);
+            cb(null);
+        }
 
-		//close connection to database
-		dbclient.end();
+    ],
+    // waterfall cleanup function
+    function(err, res) {
+        if (err) {
+            console.log("Database query failed. sad");
+            console.log(err);
+            callback(err, null);
+        } else {
+            console.log("Database query completed.");
+            callback(false, results);
+        }
 
-	});
+        // Close connection
+        dbclient.end();
+    });
 
-}//function dbquery
+}; //function dbquery

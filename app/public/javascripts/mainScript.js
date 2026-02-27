@@ -157,22 +157,42 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
 }
 
 async function loadSources(pageNumber) {
-	try {
-		const response = await fetch(`/api/urls/${pageNumber}`);
-		const data = await response.json();
+   try {
+	const response = await fetch(`/api/urls/${pageNumber}`);
+	const data = await response.json();
 
-		const panel = document.getElementById("sourcesList");
-		panel.innerHTML = "";
+	const panel = document.getElementById("sourcesList");
+	panel.innerHTML = "";
 
-		data.urls.forEach(item => {
-			const box = document.createElement("div");
-			box.className = "source-box";
-			box.innerHTML = buildSourceCardHTML(item.url, item.title);
-			panel.appendChild(box);
-		});
-	} catch (err) {
-		console.error("Failed to load resources:", err);
-	}
+	data.urls.forEach(item => {
+    		const wrapper = document.createElement("div");
+		wrapper.innerHTML = buildSourceCardHTML(
+    			item.url,
+    			item.title,
+    			item.url_order
+		);
+
+		const box = wrapper.firstElementChild;
+
+		const deleteBtn = box.querySelector(".remove-source");
+
+		deleteBtn.addEventListener("click", async () => {
+	        	try {
+				await fetch(`/api/delete/${pageNumber}/${item.url_order}`, {
+                			method: "DELETE"
+            			});
+
+            			loadSources(pageNumber); // reload from DB
+        		} catch (err) {
+            			console.error("Delete failed:", err);
+        		}
+    		});
+
+    	panel.appendChild(box);
+	});
+    } catch (err) {
+	console.error("Failed to load resources:", err);
+    }
 }
 
 /* Close popup function */
@@ -222,3 +242,4 @@ window.performSearch = performSearch;
 window.addEventListener("DOMContentLoaded", () => {
 	loadSources(1);
 });
+

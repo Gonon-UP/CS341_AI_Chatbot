@@ -8,11 +8,11 @@ router.get("/api/urls/:pageNumber", (req, res) => {
 	const query = `
 		SELECT url_order, title, url
 		FROM urls
-		WHERE page_number = ${pageNumber}
+		WHERE page_number = ?
 		ORDER BY url_order;
 	`;
 
-	db.dbquery(query, (err, results) => {
+	db.dbquery(query, [pageNumber], (err, results) => {
 		if(err) {
 			return res.status(500).json({ error: "Fetch failed" });
 		}
@@ -22,3 +22,4 @@ router.get("/api/urls/:pageNumber", (req, res) => {
 });
 
 module.exports = router;
+

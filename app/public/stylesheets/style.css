@@ -72,10 +72,10 @@ body {
   
   /* Smoothly fades the color over 0.3 seconds */
   transition: background-color 0.3s ease;
-  transition: border-color 0.3s ease;
+              border-color 0.3s ease;
 }
 
-.custom-botton:hover {
+.custom-button:hover {
   /* Fades to a light whitish purple */
   background-color: var(--highlight-color);
 }
@@ -149,9 +149,90 @@ body {
 #sourcesPanel {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+
+  align-items: stretch;
+  gap: 12px;
+}
+
+.sources-list {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  overflow-y: auto;
+}
+
+.source-box {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  height: 100%;
-  padding: 10px;
+  background-color: var(--element-color);
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--element-title-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 12px;
+  box-shadow: 0 2px 6px #00000020;
+}
+
+.source-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.source-favicon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.source-title {
+  color: var(--element-title-color);
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source-title:hover {
+  text-decoration: underline;
+}
+
+.remove-source {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  border: none;
+
+  background-color: var(--highlight-color);
+  color: white;
+
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.remove-source:hover {
+  background-color: #5e41a0;
 }
 
 .drive-status {
@@ -297,7 +378,7 @@ body {
   border: 1px solid var(--border-color);
   outline: none;
   resize: none;
-  min-height: 42px;
+  min-height: 43px;
   max-height: 200px;
   overflow-y: auto;
   box-sizing: border-box;
@@ -337,12 +418,4 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-}
-
-.source-box {
-  background-color:#d5b6ff;
-  border-radius: 5px;
-}
-.remove-source {
-  border-radius: 50%;
 }
