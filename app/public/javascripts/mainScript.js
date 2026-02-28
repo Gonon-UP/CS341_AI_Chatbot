@@ -144,6 +144,11 @@ async function loadPage(pageId) {
 
   try {
     const response = await fetch(`/page/${pageId}`);
+
+    if (!response.ok) {
+      throw new Error("Server error");
+    }
+
     const data = await response.json();
 
     currentPageId = pageId;
