@@ -41,5 +41,8 @@ export function buildSourceCardHTML(url, pageTitle, urlOrder) {
 }
 
 export function buildPageCardHTML(page) {
-  return `<div class="page-card-title">${page.title}</div>`;
+    return `
+        <button class="page-card"
+            data-page-id="${page.page_number}">${page.title || "Untitled Notebook"}</button>
+    `;
 }

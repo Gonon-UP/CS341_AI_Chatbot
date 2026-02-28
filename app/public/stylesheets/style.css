@@ -264,6 +264,27 @@ body {
   height: 100%;
 }
 
+.page-card {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 6px;
+
+    background-color: var(--element-color);
+    border: none;
+    border-radius: 8px;
+
+    font-weight: 600;
+    text-align: left;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.page-card:hover {
+    background-color: var(--background-color);
+}
+
 /**************************************************/
 /****************** CHAT PANEL ********************/
 /**************************************************/

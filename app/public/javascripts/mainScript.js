@@ -31,40 +31,40 @@ document.getElementById("saveButton")
 
 async function saveNotebook() {
 
-    const title = titleArea.value.trim();
+  const title = titleArea.value.trim();
 
-    if (!title) {
-        alert("Please enter a notebook title.");
-        return;
-    }
+  if (!title) {
+    alert("Please enter a notebook title.");
+    return;
+  }
 
-    const sources = [];
+  const sources = [];
 
-    document.querySelectorAll("#sourcesList .source-card").forEach(card => {
+  document.querySelectorAll("#sourcesList .source-card").forEach(card => {
 
-        const sourceTitle = card.querySelector(".source-title").textContent;
-        const sourceUrl = card.querySelector("a").href;
+    const sourceTitle = card.querySelector(".source-title").textContent;
+    const sourceUrl = card.querySelector("a").href;
 
-        sources.push({ title: sourceTitle, url: sourceUrl });
-    });
+    sources.push({ title: sourceTitle, url: sourceUrl });
+  });
 
-    const response = await fetch("/savePage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            pageId: currentPageId,
-            title,
-            urls: sources
-        })
-    });
+  const response = await fetch("/savePage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      pageId: currentPageId,
+      title,
+      urls: sources
+    })
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (data.pageId) {
-        currentPageId = data.pageId;
-    }
+  if (data.pageId) {
+    currentPageId = data.pageId;
+  }
 
-    loadSavedPages();
+  loadSavedPages();
 }
 
 
@@ -116,8 +116,14 @@ async function loadSavedPages() {
 
       const card = wrapper.firstElementChild;
 
-      card.addEventListener("click", () => {
-        loadPage(page.page_number);
+      card.addEventListener("click", async () => {
+
+        // Auto-save current notebook before switching
+        if (currentPageId !== null) {
+          await saveNotebook();
+        }
+
+        await loadPage(page.page_number);
       });
 
       panel.appendChild(card);
