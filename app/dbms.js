@@ -51,6 +51,8 @@ exports.dbquery = function (query_str, params, callback) {
 
             dbclient.connect(cb);
         },
+            dbclient.connect(cb);
+        },
 
         // Step 2: Issue query
         function (_, cb) {  // previous results ignored
