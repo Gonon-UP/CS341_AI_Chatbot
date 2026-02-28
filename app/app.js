@@ -12,6 +12,7 @@ var loadURLRouter = require('./routes/loadURL');
 var deleteURLRouter = require('./routes/deleteURL');
 var savePageRouter = require('./routes/savePage');
 var loadPagesRouter = require('./routes/loadPages');
+var deletePageRouter = require('./routes/deletePage');
 
 var app = express();
 
@@ -32,6 +33,7 @@ app.use('/', loadURLRouter);
 app.use('/', deleteURLRouter);
 app.use('/', savePageRouter);
 app.use('/', loadPagesRouter);
+app.use('/', deletePageRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

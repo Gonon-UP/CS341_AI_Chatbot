@@ -82,8 +82,9 @@ exports.dbquery = function (query_str, params, callback) {
             dbclient.end();
         });
 
-}; 
+}; //function dbquery
 
+// Converts a dbquery into an array (needed for loading/saving Pages)
 exports.query = function(query, params = []) {
 	return new Promise((resolve, reject) => {
 		exports.dbquery(query, params, function(err, results) {
@@ -91,4 +92,4 @@ exports.query = function(query, params = []) {
 			else resolve([results]);
 		});
 	});
-};//function dbquery
+}; //function query

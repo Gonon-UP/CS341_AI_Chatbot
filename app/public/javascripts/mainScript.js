@@ -30,48 +30,72 @@ document.getElementById("saveButton")
 
 
 async function saveNotebook() {
-  const title = titleArea.value.trim();
 
-  if (!title) {
-    alert("Please enter a notebook title.");
-    return;
-  }
+    const title = titleArea.value.trim();
 
-  const sources = [];
+    if (!title) {
+        alert("Please enter a notebook title.");
+        return;
+    }
 
-  document.querySelectorAll("#sourcesList .source-card").forEach((card, index) => {
-    const sourceTitle = card.querySelector(".source-title").textContent;
-    const sourceUrl = card.querySelector("a").href;
+    const sources = [];
 
-    sources.push({
-      title: sourceTitle,
-      url: sourceUrl
+    document.querySelectorAll("#sourcesList .source-card").forEach(card => {
+
+        const sourceTitle = card.querySelector(".source-title").textContent;
+        const sourceUrl = card.querySelector("a").href;
+
+        sources.push({ title: sourceTitle, url: sourceUrl });
     });
-  });
 
-  try {
     const response = await fetch("/savePage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        pageId: currentPageId,
-        title,
-        urls: sources
-      })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            pageId: currentPageId,
+            title,
+            urls: sources
+        })
     });
 
     const data = await response.json();
 
-    if (response.ok) {
-      currentPageId = data.pageId;
-      alert("Notebook saved!");
-      loadSavedPages();              // refresh left panel
-    } else {
-      alert(data.message);
+    if (data.pageId) {
+        currentPageId = data.pageId;
     }
 
-  } catch (error) {
-    console.error("Error saving notebook:", error);
+    loadSavedPages();
+}
+
+
+document.getElementById("deleteButton")
+  .addEventListener("click", deletePage);
+
+async function deletePage() {
+
+  if (!currentPageId) {
+    alert("No page selected.");
+    return;
+  }
+
+  if (!confirm("Delete this page?")) return;
+
+  try {
+    await fetch(`/deletePage/${currentPageId}`, {
+      method: "DELETE"
+    });
+
+    currentPageId = null;
+
+    titleArea.value = "";
+    document.getElementById("sourcesList").innerHTML = "";
+
+    loadSavedPages();
+
+    alert("Page deleted.");
+
+  } catch (err) {
+    console.error(err);
   }
 }
 
