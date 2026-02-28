@@ -3,13 +3,16 @@ import {
   isValidMessage,
   buildSearchUrl,
   buildResultCardHTML,
-  buildSourceCardHTML
+  buildSourceCardHTML,
+  buildPageCardHTML
 } from "./chatLogic.js";
+
+let currentPageId = null;
 
 const titleArea = document.getElementById("titleArea");
 const messageArea = document.getElementById("messageArea");
 const textArea = document.getElementById("textBox");
-const sendBtn = document.getElementById("sendButton"); 
+const sendBtn = document.getElementById("sendButton");
 
 sendBtn.addEventListener("click", sendMessage);
 
@@ -20,6 +23,125 @@ titleArea.addEventListener("keydown", (e) => {
     titleArea.blur();
   }
 });
+
+
+document.getElementById("saveButton")
+  .addEventListener("click", saveNotebook);
+
+
+async function saveNotebook() {
+  const title = titleArea.value.trim();
+
+  if (!title) {
+    alert("Please enter a notebook title.");
+    return;
+  }
+
+  const sources = [];
+
+  document.querySelectorAll("#sourcesList .source-card").forEach((card, index) => {
+    const sourceTitle = card.querySelector(".source-title").textContent;
+    const sourceUrl = card.querySelector("a").href;
+
+    sources.push({
+      title: sourceTitle,
+      url: sourceUrl
+    });
+  });
+
+  try {
+    const response = await fetch("/savePage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pageId: currentPageId,
+        title,
+        urls: sources
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      currentPageId = data.pageId;
+      alert("Notebook saved!");
+      loadSavedPages();              // refresh left panel
+    } else {
+      alert(data.message);
+    }
+
+  } catch (error) {
+    console.error("Error saving notebook:", error);
+  }
+}
+
+
+window.addEventListener("DOMContentLoaded", loadSavedPages);
+
+async function loadSavedPages() {
+  try {
+    const response = await fetch("/pages");
+    const pages = await response.json();
+
+    const panel = document.getElementById("meetingsPanel");
+    panel.innerHTML = "";
+
+    pages.forEach(page => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildPageCardHTML(page);
+
+      const card = wrapper.firstElementChild;
+
+      card.addEventListener("click", () => {
+        loadPage(page.page_number);
+      });
+
+      panel.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error("Error loading saved pages:", err);
+  }
+}
+
+
+async function loadPage(pageId) {
+
+  // Optional auto-save current notebook
+  if (currentPageId !== null) {
+    await saveNotebook();
+  }
+
+  try {
+    const response = await fetch(`/page/${pageId}`);
+    const data = await response.json();
+
+    currentPageId = pageId;
+
+    // Clear UI
+    titleArea.value = "";
+    document.getElementById("sourcesList").innerHTML = "";
+    messageArea.innerHTML = "";
+
+    // Load title
+    titleArea.value = data.page.title;
+
+    // Load sources
+    data.urls.forEach(item => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(
+        item.url,
+        item.title,
+        item.url_order
+      );
+      document.getElementById("sourcesList")
+        .appendChild(wrapper.firstElementChild);
+    });
+
+  } catch (err) {
+    console.error("Failed to load page:", err);
+  }
+}
 
 
 /* Adds messages to the Chatbot (display) */
@@ -89,7 +211,7 @@ textArea.addEventListener("keydown", (e) => {
 });
 
 
-/* saveSources(), called by "Add Web Sources" button */
+/* addSources(), called by "Add Web Sources" button */
 async function addSources() {
   const overlay = document.getElementById("popupOverlay");
 
@@ -133,46 +255,66 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
   const pageTitle = preFetchedTitle || url;
 
   try {
-	  const response = await fetch("/api/save", {
-		  method: "POST",
-		  headers: { "Content-Type": "application/json" },
-		  body: JSON.stringify({
-			  page_number: 1,  // default page
-			  title: pageTitle,
-			  url: url
-		  })
-	  });
+    const response = await fetch("/api/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        page_number: currentPageId,
+        title: pageTitle,
+        url: url
+      })
+    });
 
-	  const data = await response.json();
+    const data = await response.json();
 
-	  if(data.success) {
-		  loadSources(1);
-	  }
+    if (data.success) {
+      loadSources(1);
+    }
 
   } catch (err) {
-	  console.error("Save failed:", err);
+    console.error("Save failed:", err);
   }
 
   closePopup();
 }
 
 async function loadSources(pageNumber) {
-	try {
-		const response = await fetch(`/api/urls/${pageNumber}`);
-		const data = await response.json();
+  try {
+    const response = await fetch(`/api/urls/${pageNumber}`);
+    const data = await response.json();
 
-		const panel = document.getElementById("sourcesList");
-		panel.innerHTML = "";
+    const panel = document.getElementById("sourcesList");
+    panel.innerHTML = "";
 
-		data.urls.forEach(item => {
-			const box = document.createElement("div");
-			box.className = "source-box";
-			box.innerHTML = buildSourceCardHTML(item.url, item.title);
-			panel.appendChild(box);
-		});
-	} catch (err) {
-		console.error("Failed to load resources:", err);
-	}
+    data.urls.forEach(item => {
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(
+        item.url,
+        item.title,
+        item.url_order
+      );
+
+      const box = wrapper.firstElementChild;
+
+      const deleteBtn = box.querySelector(".remove-source");
+
+      deleteBtn.addEventListener("click", async () => {
+        try {
+          await fetch(`/api/delete/${pageNumber}/${item.url_order}`, {
+            method: "DELETE"
+          });
+
+          loadSources(pageNumber); // reload from DB
+        } catch (err) {
+          console.error("Delete failed:", err);
+        }
+      });
+
+      panel.appendChild(box);
+    });
+  } catch (err) {
+    console.error("Failed to load resources:", err);
+  }
 }
 
 /* Close popup function */
@@ -218,7 +360,3 @@ async function performSearch() {
 window.addSources = addSources;
 window.saveSource = saveSource;
 window.performSearch = performSearch;
-
-window.addEventListener("DOMContentLoaded", () => {
-	loadSources(1);
-});

@@ -8,10 +8,10 @@ router.post("/api/save", (req, res) => {
 	const getOrderQuery = `
 		SELECT IFNULL(MAX(url_order), 0) + 1 AS nextOrder
 		FROM urls
-		WHERE page_number = ${page_number};
+		WHERE page_number = ?;
 	`;
 
-	db.dbquery(getOrderQuery, (err, results) => {
+	db.dbquery(getOrderQuery, [page_number], (err, results) => {
 		if(err) {
 			return res.status(500).json({ error: "DB error" });
 		}
@@ -20,12 +20,10 @@ router.post("/api/save", (req, res) => {
 
 		const insertQuery = `
 			INSERT INTO urls (page_number, url_order, title, url)
-			VALUES (${page_number}, ${nextOrder},
-				'${title.replace(/'/g, "\\'")}',
-				'${url.replace(/'/g, "\\'")}');
-			`;
+			VALUES (?, ?, ?, ?);
+		`;
 
-		db.dbquery(insertQuery, (err2) => {
+		db.dbquery(insertQuery, [page_number, nextOrder, title, url], (err2) => {
 			if(err2) {
 				return res.status(500).json({ error: "Insert failed" });
 			}
@@ -36,3 +34,4 @@ router.post("/api/save", (req, res) => {
 });
 
 module.exports = router;
+

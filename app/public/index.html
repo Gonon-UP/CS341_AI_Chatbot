@@ -19,8 +19,12 @@
 <body>
     <!-- Container to separate Title and Row (where element are displayed) -->
     <div class="page">
-        <textarea class="title" id="titleArea" placeholder="Notebook Title"
-                  maxlength="50" rows="1"></textarea>
+        <div class="title-container">
+            <textarea class="title" id="titleArea" placeholder="Notebook Title"
+                      maxlength="50" rows="1"></textarea>
+
+            <button class="custom-button" id="saveButton">Save</button>
+        </div>
 
         <!-- Displays 3 sections (left, middle, right columns)
              with 25%, 50%, 25% of page width, respectively -->

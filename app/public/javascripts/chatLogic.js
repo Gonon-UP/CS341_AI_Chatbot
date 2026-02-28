@@ -28,12 +28,18 @@ export function buildResultCardHTML(result) {
   `;
 }
 
-export function buildSourceCardHTML(url, pageTitle) {
+export function buildSourceCardHTML(url, pageTitle, urlOrder) {
   return `
-      <img src="${url}/favicon.ico" alt="alternatetext"> 
-      <span>
-          <a href="${url}" target="_blank">${pageTitle}</a>
-      </span>
-      <button class="remove-source" onclick="this.parentElement.remove()">×</button>
+    <div class="source-box">
+      <div class="source-info">
+        <img src="https://www.google.com/s2/favicons?domain=${url}" alt="favicon" class="source-favicon">
+        <a href="${url}" target="_blank" class="source-title">${pageTitle}</a>
+      </div>
+      <button class="remove-source" data-order="${urlOrder}">×</button>
+    </div>
   `;
+}
+
+export function buildPageCardHTML(page) {
+  return `<div class="page-card-title">${page.title}</div>`;
 }
