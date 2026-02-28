@@ -11,6 +11,7 @@ var saveURLRouter = require('./routes/saveURL');
 var loadURLRouter = require('./routes/loadURL');
 var deleteURLRouter = require('./routes/deleteURL');
 var savePageRouter = require('./routes/savePage');
+var loadPageRouter = require('./routes/loadPage');
 var loadPagesRouter = require('./routes/loadPages');
 var deletePageRouter = require('./routes/deletePage');
 
@@ -32,6 +33,7 @@ app.use('/', saveURLRouter);
 app.use('/', loadURLRouter);
 app.use('/', deleteURLRouter);
 app.use('/', savePageRouter);
+app.use('/', loadPageRouter);
 app.use('/', loadPagesRouter);
 app.use('/', deletePageRouter);
 
@@ -42,13 +44,11 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  console.error(err);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).json({
+    error: err.message || "Server error"
+  });
 });
 
 module.exports = app;

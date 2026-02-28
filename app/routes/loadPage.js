@@ -18,10 +18,9 @@ router.get("/page/:id", async (req, res) => {
         );
 
         if (!pages || pages.length === 0) {
-            return res.json({
-                page: null,
-                urls: []
-            });
+            return res.status(404).json({
+	        error: "Not found"
+	    });
         }
 
         res.json({
@@ -32,10 +31,11 @@ router.get("/page/:id", async (req, res) => {
     } catch (err) {
         console.error(err);
 
-        res.json({
-            page: null,
-            urls: []
-        });
+        if(!res.headersSent) {
+	    res.status(500).json({
+	        error: "Server error"
+	    });
+	}
     }
 });
 

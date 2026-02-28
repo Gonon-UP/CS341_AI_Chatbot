@@ -71,31 +71,28 @@ async function saveNotebook() {
 document.getElementById("deleteButton")
   .addEventListener("click", deletePage);
 
+
 async function deletePage() {
 
-  if (!currentPageId) {
-    alert("No page selected.");
-    return;
-  }
+  if (!currentPageId) return;
 
   if (!confirm("Delete this page?")) return;
 
-  try {
-    await fetch(`/deletePage/${currentPageId}`, {
-      method: "DELETE"
-    });
+  const response = await fetch(`/page/${currentPageId}`, {
+    method: "DELETE"
+  });
 
-    currentPageId = null;
+  const data = await response.json();
 
+  currentPageId = null;
+
+  loadSavedPages();
+
+  if (data.nextPageId) {
+    loadPage(data.nextPageId);
+  } else {
     titleArea.value = "";
     document.getElementById("sourcesList").innerHTML = "";
-
-    loadSavedPages();
-
-    alert("Page deleted.");
-
-  } catch (err) {
-    console.error(err);
   }
 }
 
@@ -116,14 +113,8 @@ async function loadSavedPages() {
 
       const card = wrapper.firstElementChild;
 
-      card.addEventListener("click", async () => {
-
-        // Auto-save current notebook before switching
-        if (currentPageId !== null) {
-          await saveNotebook();
-        }
-
-        await loadPage(page.page_number);
+      card.addEventListener("click", () => {
+        loadPage(page.page_number);
       });
 
       panel.appendChild(card);
@@ -137,44 +128,37 @@ async function loadSavedPages() {
 
 async function loadPage(pageId) {
 
-  // Optional auto-save current notebook
-  if (currentPageId !== null) {
-    await saveNotebook();
-  }
-
   try {
+
     const response = await fetch(`/page/${pageId}`);
 
     if (!response.ok) {
-      throw new Error("Server error");
+      throw new Error("Page not found");
     }
 
     const data = await response.json();
 
     currentPageId = pageId;
 
-    // Clear UI
-    titleArea.value = "";
-    document.getElementById("sourcesList").innerHTML = "";
-    messageArea.innerHTML = "";
+    titleArea.value = data.page.title || "";
 
-    // Load title
-    titleArea.value = data.page.title;
+    const panel = document.getElementById("sourcesList");
+    panel.innerHTML = "";
 
-    // Load sources
     data.urls.forEach(item => {
       const wrapper = document.createElement("div");
+
       wrapper.innerHTML = buildSourceCardHTML(
         item.url,
         item.title,
         item.url_order
       );
-      document.getElementById("sourcesList")
-        .appendChild(wrapper.firstElementChild);
+
+      panel.appendChild(wrapper.firstElementChild);
     });
 
   } catch (err) {
-    console.error("Failed to load page:", err);
+    console.error(err);
   }
 }
 

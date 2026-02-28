@@ -22,7 +22,10 @@ router.post("/savePage", async (req, res) => {
             );
         }
 
-        res.json({ message: "Saved successfully!" });
+        res.json({
+	    message: "Saved successfully!",
+	    pageId: pageNumber
+	});
 
     } catch (err) {
         console.error(err);
