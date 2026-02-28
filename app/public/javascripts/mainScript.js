@@ -7,75 +7,105 @@ import {
   buildPageCardHTML
 } from "./chatLogic.js";
 
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
 let currentPageId = null;
 
+/* Cached DOM Elements */
 const titleArea = document.getElementById("titleArea");
 const messageArea = document.getElementById("messageArea");
 const textArea = document.getElementById("textBox");
 const sendBtn = document.getElementById("sendButton");
+const saveBtn = document.getElementById("saveButton");
 
-sendBtn.addEventListener("click", sendMessage);
+/* =========================================================
+   INITIALIZATION
+========================================================= */
 
-/* Title textbox at top of page */
-titleArea.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    titleArea.blur();
-  }
+window.addEventListener("DOMContentLoaded", () => {
+
+  setupTopBar();
+  setupChatPanel();
+  loadSavedPages();
+
 });
 
+/* =========================================================
+   TOP BAR (Title + New Page + Delete)
+========================================================= */
 
-document.getElementById("saveButton")
-  .addEventListener("click", saveNotebook);
+function setupTopBar() {
 
-
-async function saveNotebook() {
-
-  const title = titleArea.value.trim();
-
-  if (!title) {
-    alert("Please enter a notebook title.");
-    return;
-  }
-
-  const sources = [];
-
-  document.querySelectorAll("#sourcesList .source-card").forEach(card => {
-
-    const sourceTitle = card.querySelector(".source-title").textContent;
-    const sourceUrl = card.querySelector("a").href;
-
-    sources.push({ title: sourceTitle, url: sourceUrl });
+  /* Title Auto Save */
+  titleArea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      titleArea.blur();
+    }
   });
 
-  const response = await fetch("/savePage", {
+  titleArea.addEventListener("blur", autoSaveTitle);
+
+  /* New Page Button */
+  saveBtn.textContent = "New Page";
+  saveBtn.addEventListener("click", createNewPage);
+
+  /* Delete Button */
+  document.getElementById("deleteButton")
+    .addEventListener("click", deletePage);
+}
+
+
+async function autoSaveTitle() {
+
+  if (!currentPageId) return;
+
+  await fetch(`/page/${currentPageId}/title`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({
-      pageId: currentPageId,
-      title,
-      urls: sources
+      title: titleArea.value.trim()
     })
   });
-
-  const data = await response.json();
-
-  if (data.pageId) {
-    currentPageId = data.pageId;
-  }
 
   loadSavedPages();
 }
 
 
-document.getElementById("deleteButton")
-  .addEventListener("click", deletePage);
+async function createNewPage() {
 
+  const response = await fetch("/savePage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      pageId: null,
+      title: "",
+      urls: []
+    })
+  });
+
+  const data = await response.json();
+
+  if (!data.pageId) return;
+
+  currentPageId = data.pageId;
+
+  /* Reset UI */
+  titleArea.value = "";
+  document.getElementById("sourcesList").innerHTML = "";
+  messageArea.innerHTML = "";
+
+  loadSavedPages();
+  loadPage(data.pageId);
+}
 
 async function deletePage() {
 
   if (!currentPageId) return;
-
   if (!confirm("Delete this page?")) return;
 
   const response = await fetch(`/page/${currentPageId}`, {
@@ -96,11 +126,15 @@ async function deletePage() {
   }
 }
 
-
-window.addEventListener("DOMContentLoaded", loadSavedPages);
+/* =========================================================
+   LEFT PANEL
+   Sources + Previous Meetings
+========================================================= */
 
 async function loadSavedPages() {
+
   try {
+
     const response = await fetch("/pages");
     const pages = await response.json();
 
@@ -108,6 +142,7 @@ async function loadSavedPages() {
     panel.innerHTML = "";
 
     pages.forEach(page => {
+
       const wrapper = document.createElement("div");
       wrapper.innerHTML = buildPageCardHTML(page);
 
@@ -125,6 +160,9 @@ async function loadSavedPages() {
   }
 }
 
+/* =========================================================
+   PAGE LOADING
+========================================================= */
 
 async function loadPage(pageId) {
 
@@ -132,9 +170,7 @@ async function loadPage(pageId) {
 
     const response = await fetch(`/page/${pageId}`);
 
-    if (!response.ok) {
-      throw new Error("Page not found");
-    }
+    if (!response.ok) throw new Error("Page not found");
 
     const data = await response.json();
 
@@ -142,30 +178,60 @@ async function loadPage(pageId) {
 
     titleArea.value = data.page.title || "";
 
-    const panel = document.getElementById("sourcesList");
-    panel.innerHTML = "";
-
-    data.urls.forEach(item => {
-      const wrapper = document.createElement("div");
-
-      wrapper.innerHTML = buildSourceCardHTML(
-        item.url,
-        item.title,
-        item.url_order
-      );
-
-      panel.appendChild(wrapper.firstElementChild);
-    });
+    loadSourcesFromDB(data.urls);
 
   } catch (err) {
     console.error(err);
   }
 }
 
+function loadSourcesFromDB(urls) {
 
-/* Adds messages to the Chatbot (display) */
+  const panel = document.getElementById("sourcesList");
+  panel.innerHTML = "";
+
+  urls.forEach(item => {
+
+    const wrapper = document.createElement("div");
+
+    wrapper.innerHTML = buildSourceCardHTML(
+      item.url,
+      item.title,
+      item.url_order
+    );
+
+    panel.appendChild(wrapper.firstElementChild);
+  });
+}
+
+/* =========================================================
+   CHATBOT PANEL
+========================================================= */
+
+function setupChatPanel() {
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  textArea.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+
+      const originalColor = sendBtn.style.borderColor;
+
+      sendBtn.style.borderColor = "white";
+
+      setTimeout(() => {
+        sendBtn.style.borderColor = originalColor;
+      }, 200);
+    }
+  });
+}
+
 function addMessage(text, type = "user") {
+
   const msg = document.createElement("div");
+
   msg.className = `message ${type}`;
   msg.textContent = text;
 
@@ -173,11 +239,8 @@ function addMessage(text, type = "user") {
   messageArea.scrollTop = messageArea.scrollHeight;
 }
 
-
-/* Sends messages to Chatbot */
 async function sendMessage() {
 
-  // Now uses pure validation logic
   if (!isValidMessage(textArea.value)) return;
 
   textArea.disabled = true;
@@ -190,54 +253,39 @@ async function sendMessage() {
   addMessage("Bot is typing...", "typing");
 
   try {
+
     const botReply = await getBotReply(userQuery);
 
     const typingEl = messageArea.querySelector(".typing");
     if (typingEl) typingEl.remove();
 
     addMessage(botReply, "bot");
-  } catch (err) {
-    console.error(err);
+
   } finally {
+
     textArea.disabled = false;
     sendBtn.disabled = false;
     textArea.focus();
   }
 }
 
-
-/* Chatbot reply function */
 async function getBotReply(query) {
+
   return new Promise(resolve => {
     setTimeout(() => resolve(formatBotReply(query)), 1000);
   });
 }
 
+/* =========================================================
+   SOURCES PANEL
+========================================================= */
 
-/* Extra highlight feature */
-textArea.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
-
-    const originalColor = sendBtn.style.borderColor;
-    sendBtn.style.borderColor = "white";
-
-    setTimeout(() => {
-      sendBtn.style.borderColor = originalColor;
-    }, 200);
-  }
-});
-
-
-/* addSources(), called by "Add Web Sources" button */
 async function addSources() {
+
   const overlay = document.getElementById("popupOverlay");
 
   const response = await fetch("popups/addSources.html");
-  const html = await response.text();
-
-  overlay.innerHTML = html;
+  overlay.innerHTML = await response.text();
   overlay.style.display = "flex";
 
   const resultsContainer = overlay.querySelector("#searchResults");
@@ -251,44 +299,45 @@ async function addSources() {
   });
 
   resultsContainer.addEventListener("click", (e) => {
+
     const btn = e.target.closest(".select-result-btn");
+
     if (btn) {
-      const url = btn.dataset.url;
-      const title = btn.dataset.title;
-      saveSource(title, url);
+      saveSource(
+        btn.dataset.title,
+        btn.dataset.url
+      );
     }
   });
 
-  const closeBtn = overlay.querySelector("#closeButton");
-  if (closeBtn) {
-    closeBtn.addEventListener("click", closePopup);
-  }
+  overlay.querySelector("#closeButton")
+    ?.addEventListener("click", closePopup);
 }
 
-
-/* saves the sources in the SourcesList div */
 async function saveSource(preFetchedTitle = null, directUrl = null) {
-  const url = directUrl || document.getElementById("sourceInput").value.trim();
+
+  const url = directUrl ||
+    document.getElementById("sourceInput").value.trim();
+
   if (!url) return;
 
-  const pageTitle = preFetchedTitle || url;
-
   try {
+
     const response = await fetch("/api/save", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({
         page_number: currentPageId,
-        title: pageTitle,
-        url: url
+        title: preFetchedTitle || url,
+        url
       })
     });
 
     const data = await response.json();
 
-    if (data.success) {
-      loadSources(1);
-    }
+    if (data.success) loadSources(currentPageId);
 
   } catch (err) {
     console.error("Save failed:", err);
@@ -298,7 +347,9 @@ async function saveSource(preFetchedTitle = null, directUrl = null) {
 }
 
 async function loadSources(pageNumber) {
+
   try {
+
     const response = await fetch(`/api/urls/${pageNumber}`);
     const data = await response.json();
 
@@ -306,7 +357,9 @@ async function loadSources(pageNumber) {
     panel.innerHTML = "";
 
     data.urls.forEach(item => {
+
       const wrapper = document.createElement("div");
+
       wrapper.innerHTML = buildSourceCardHTML(
         item.url,
         item.title,
@@ -315,37 +368,36 @@ async function loadSources(pageNumber) {
 
       const box = wrapper.firstElementChild;
 
-      const deleteBtn = box.querySelector(".remove-source");
+      box.querySelector(".remove-source")
+        ?.addEventListener("click", async () => {
 
-      deleteBtn.addEventListener("click", async () => {
-        try {
           await fetch(`/api/delete/${pageNumber}/${item.url_order}`, {
             method: "DELETE"
           });
 
-          loadSources(pageNumber); // reload from DB
-        } catch (err) {
-          console.error("Delete failed:", err);
-        }
-      });
+          loadSources(pageNumber);
+        });
 
       panel.appendChild(box);
     });
+
   } catch (err) {
     console.error("Failed to load resources:", err);
   }
 }
 
-/* Close popup function */
+/* =========================================================
+   POPUP UTILITIES
+========================================================= */
+
 function closePopup() {
   const overlay = document.getElementById("popupOverlay");
   overlay.style.display = "none";
   overlay.innerHTML = "";
 }
 
-
-/* Use Brave API to search the web */
 async function performSearch() {
+
   const overlay = document.getElementById("popupOverlay");
   const query = overlay.querySelector("#webSearch").value.trim();
   const resultsContainer = overlay.querySelector("#searchResults");
@@ -355,26 +407,30 @@ async function performSearch() {
   resultsContainer.innerHTML = "Searching...";
 
   try {
-    // Now uses pure URL builder
+
     const response = await fetch(buildSearchUrl(query));
     const data = await response.json();
 
     resultsContainer.innerHTML = "";
 
     data.forEach(result => {
+
       const card = document.createElement("div");
       card.className = "result-card";
-
-      // Now uses pure HTML builder
       card.innerHTML = buildResultCardHTML(result);
 
       resultsContainer.appendChild(card);
     });
 
   } catch (err) {
+
     resultsContainer.innerHTML = "Search failed.";
   }
 }
+
+/* =========================================================
+   EXPORT TO WINDOW (HTML onclick hooks)
+========================================================= */
 
 window.addSources = addSources;
 window.saveSource = saveSource;
