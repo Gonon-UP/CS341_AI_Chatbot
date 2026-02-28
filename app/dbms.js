@@ -51,8 +51,6 @@ exports.dbquery = function (query_str, params, callback) {
 
             dbclient.connect(cb);
         },
-            dbclient.connect(cb);
-        },
 
         // Step 2: Issue query
         function (_, cb) {  // previous results ignored
@@ -84,4 +82,13 @@ exports.dbquery = function (query_str, params, callback) {
             dbclient.end();
         });
 
-}; //function dbquery
+}; 
+
+exports.query = function(query, params = []) {
+	return new Promise((resolve, reject) => {
+		exports.dbquery(query, params, function(err, results) {
+			if(err) reject(err);
+			else resolve([results]);
+		});
+	});
+};//function dbquery

@@ -8,10 +8,10 @@ router.get("/pages", async (req, res) => {
             "SELECT page_number, title FROM pages ORDER BY page_number DESC"
         );
 
-        res.json(pages);
+        res.json(pages || []);
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: "Error fetching pages." });
+        res.status(500).json([]);
     }
 });
 
