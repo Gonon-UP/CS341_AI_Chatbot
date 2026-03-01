@@ -103,24 +103,26 @@ async function createNewPage() {
   loadPage(data.pageId);
 }
 
-async function deletePage() {
+async function deletePage(pageId = currentPageId) {
 
-  if (!currentPageId) return;
+  if (!pageId) return;
   if (!confirm("Delete this page?")) return;
 
-  const response = await fetch(`/page/${currentPageId}`, {
+  const response = await fetch(`/page/${pageId}`, {
     method: "DELETE"
   });
 
   const data = await response.json();
 
-  currentPageId = null;
+  if (pageId === currentPageId) {
+    currentPageId = null;
+  }
 
   loadSavedPages();
 
   if (data.nextPageId) {
     loadPage(data.nextPageId);
-  } else {
+  } else if (pageId === currentPageId) {
     titleArea.value = "";
     document.getElementById("sourcesList").innerHTML = "";
   }
@@ -132,24 +134,31 @@ async function deletePage() {
 ========================================================= */
 
 async function loadSavedPages() {
-
   try {
-
     const response = await fetch("/pages");
     const pages = await response.json();
 
-    const panel = document.getElementById("meetingsPanel");
+    const panel = document.getElementById("pagesList");
     panel.innerHTML = "";
 
     pages.forEach(page => {
-
       const wrapper = document.createElement("div");
       wrapper.innerHTML = buildPageCardHTML(page);
 
       const card = wrapper.firstElementChild;
 
-      card.addEventListener("click", () => {
+      const titleBtn = card.querySelector(".page-title");
+      const deleteBtn = card.querySelector(".delete-page");
+
+      // Open page when clicking title
+      titleBtn?.addEventListener("click", () => {
         loadPage(page.page_number);
+      });
+
+      // Delete page when clicking X
+      deleteBtn?.addEventListener("click", async (e) => {
+        e.stopPropagation(); // Prevent accidental bubbling
+        await deletePage(page.page_number);
       });
 
       panel.appendChild(card);

@@ -41,8 +41,17 @@ export function buildSourceCardHTML(url, pageTitle, urlOrder) {
 }
 
 export function buildPageCardHTML(page) {
-    return `
-        <button class="page-card"
-            data-page-id="${page.page_number}">${page.title || "Untitled Notebook"}</button>
-    `;
+  return `
+    <div class="page-box" data-page-id="${page.page_number}">
+      <div class="page-info">
+        <span class="page-icon">📓</span>
+        <button class="page-title">
+          ${page.title || "Untitled Notebook"}
+        </button>
+      </div>
+      <button class="delete-page" data-page-id="${page.page_number}">
+        ×
+      </button>
+    </div>
+  `;
 }
