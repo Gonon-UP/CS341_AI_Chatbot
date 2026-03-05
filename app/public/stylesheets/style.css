@@ -83,6 +83,42 @@ body {
   border: 1px solid white;
 }
 
+/* CUSTOM LIST - used for sources, pages, topics */
+.custom-list {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  overflow-y: auto;
+}
+
+/* Scrollbar styling to match chat + sources */
+.custom-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--element-color);
+}
+
+.custom-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-list::-webkit-scrollbar-track {
+  background: var(--element-color);
+  border-radius: 10px;
+}
+
+.custom-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.custom-list::-webkit-scrollbar-thumb:hover {
+  background: var(--highlight-color);
+}
+
 /**************************************************/
 /****************** GENERAL PAGE ******************/
 /**************************************************/
@@ -167,58 +203,6 @@ body {
 
   align-items: stretch;
   gap: 12px;
-}
-
-.sources-list {
-  flex: 1;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  overflow-y: auto;
-}
-
-.pages-list,
-.sources-list {
-  flex: 1;
-  min-height: 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-
-  overflow-y: auto;
-}
-
-/* Scrollbar styling to match chat + sources */
-.pages-list,
-.sources-list {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-color) var(--element-color);
-}
-
-.pages-list::-webkit-scrollbar,
-.sources-list::-webkit-scrollbar {
-  width: 8px;
-}
-
-.pages-list::-webkit-scrollbar-track,
-.sources-list::-webkit-scrollbar-track {
-  background: var(--element-color);
-  border-radius: 10px;
-}
-
-.pages-list::-webkit-scrollbar-thumb,
-.sources-list::-webkit-scrollbar-thumb {
-  background: var(--border-color);
-  border-radius: 10px;
-}
-
-.pages-list::-webkit-scrollbar-thumb:hover,
-.sources-list::-webkit-scrollbar-thumb:hover {
-  background: var(--highlight-color);
 }
 
 .source-box {
@@ -557,6 +541,44 @@ body {
   flex-direction: column;
   height: 100%;
 }
+
+.topic-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+
+  transition: 0.2s ease;
+}
+
+.topic-box:hover {
+  transform: translateY(-1px);
+}
+
+.topic-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+  width: 100%;
+}
+
+.topic-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+.topic-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 
 /* Tasks panel */
 #tasksPanel {

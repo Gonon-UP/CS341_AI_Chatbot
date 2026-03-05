@@ -4,7 +4,8 @@ import {
   buildSearchUrl,
   buildResultCardHTML,
   buildSourceCardHTML,
-  buildPageCardHTML
+  buildPageCardHTML,
+  buildTopicCardHTML
 } from "./chatLogic.js";
 
 /* =========================================================
@@ -20,6 +21,14 @@ const textArea = document.getElementById("textBox");
 const sendBtn = document.getElementById("sendButton");
 const saveBtn = document.getElementById("saveButton");
 
+/* TOPICS */
+const TOPICS = [
+  "theology",
+  "philosophy",
+  "psychology",
+  "neuroscience"
+];
+
 /* =========================================================
    INITIALIZATION
 ========================================================= */
@@ -29,7 +38,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupTopBar();
   setupChatPanel();
   loadSavedPages();
-
+  setupTopicsPanel();
 });
 
 /* =========================================================
@@ -188,6 +197,8 @@ async function loadPage(pageId) {
     titleArea.value = data.page.title || "";
 
     loadSourcesFromDB(data.urls);
+
+    loadTopics(data.topics);
 
   } catch (err) {
     console.error(err);
@@ -435,6 +446,59 @@ async function performSearch() {
 
     resultsContainer.innerHTML = "Search failed.";
   }
+}
+
+/* =========================================================
+   TOPICS PANEL
+========================================================= */
+
+function setupTopicsPanel() {
+  const panel = document.getElementById("topicsList");
+
+  panel.innerHTML = "";
+
+  TOPICS.forEach(topic => {
+
+    const wrapper = document.createElement("div");
+
+    wrapper.innerHTML = buildTopicCardHTML(topic);
+
+    const card = wrapper.firstElementChild;
+
+    const checkbox = card.querySelector(".topic-checkbox");
+
+    checkbox.addEventListener("change", saveTopics);
+
+    panel.appendChild(card);
+
+  });
+}
+
+async function saveTopics() {
+
+  if (!currentPageId) return;
+
+  const selectedTopics = [...document.querySelectorAll("#topicsList input:checked")]
+    .map(cb => cb.value);
+
+  await fetch(`/page/${currentPageId}/topics`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      topics: selectedTopics
+    })
+  });
+}
+
+function loadTopics(savedTopics = []) {
+
+  const checkboxes = document.querySelectorAll("#topicsList input");
+
+  checkboxes.forEach(cb => {
+    cb.checked = savedTopics.includes(cb.value);
+  });
 }
 
 /* =========================================================

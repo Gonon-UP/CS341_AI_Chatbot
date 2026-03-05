@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require("dotenv").config();
 
-var indexRouter = require('./routes/index');
+var searchWebRouter = require('./routes/searchWeb');
 var usersRouter = require('./routes/users');
 var saveURLRouter = require('./routes/saveURL');
 var loadURLRouter = require('./routes/loadURL');
@@ -15,6 +15,8 @@ var loadPageRouter = require('./routes/loadPage');
 var loadPagesRouter = require('./routes/loadPages');
 var deletePageRouter = require('./routes/deletePage');
 var saveTitleRouter = require('./routes/saveTitle');
+var saveTopicsRouter = requre('./routes/saveTopics');
+var loadTopicsRouter = requre('./routes/loadTopics');
 
 var app = express();
 
@@ -28,7 +30,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/', searchWebRouter);
 app.use('/users', usersRouter);
 app.use('/', saveURLRouter);
 app.use('/', loadURLRouter);
@@ -38,6 +40,8 @@ app.use('/', loadPageRouter);
 app.use('/', loadPagesRouter);
 app.use('/', deletePageRouter);
 app.use('/', saveTitleRouter);
+app.use('/', saveTopicsRouter);
+app.use('/', loadTopicsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

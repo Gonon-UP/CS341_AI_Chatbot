@@ -55,3 +55,17 @@ export function buildPageCardHTML(page) {
     </div>
   `;
 }
+
+export function buildTopicCardHTML(topic, checked = false) {
+  return `
+    <div class="topic-box">
+      <label class="topic-content">
+        <input type="checkbox"
+               class="topic-checkbox"
+               value="${topic}"
+               ${checked ? "checked" : ""}>
+        <span class="topic-name">${topic}</span>
+      </label>
+    </div>
+  `;
+}
