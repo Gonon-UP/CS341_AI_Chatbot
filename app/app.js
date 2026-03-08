@@ -15,8 +15,8 @@ var loadPageRouter = require('./routes/loadPage');
 var loadPagesRouter = require('./routes/loadPages');
 var deletePageRouter = require('./routes/deletePage');
 var saveTitleRouter = require('./routes/saveTitle');
-var saveTopicsRouter = requre('./routes/saveTopics');
-var loadTopicsRouter = requre('./routes/loadTopics');
+var saveTopicsRouter = require('./routes/saveTopics');
+var loadTopicsRouter = require('./routes/loadTopics');
 
 var app = express();
 

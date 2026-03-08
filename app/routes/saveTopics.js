@@ -9,7 +9,7 @@ router.post("/page/:id/topics", (req, res) => {
 
     // Step 1. Remove old topics first (clean replace strategy)
     const deleteQuery = `
-        DELETE FROM page_topics
+        DELETE FROM topics
         WHERE page_number = ?;
     `;
 
@@ -26,7 +26,7 @@ router.post("/page/:id/topics", (req, res) => {
 
         // Step 2. Insert new topics
         const insertQuery = `
-            INSERT INTO page_topics (page_number, topic_name)
+            INSERT INTO topics (page_number, topic_name)
             VALUES (?, ?);
         `;
 

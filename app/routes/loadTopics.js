@@ -8,7 +8,7 @@ router.get("/page/:id/topics", (req, res) => {
 
     const query = `
         SELECT topic_name
-        FROM page_topics
+        FROM topics
         WHERE page_number = ?;
     `;
 

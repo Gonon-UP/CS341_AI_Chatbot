@@ -164,7 +164,7 @@ body {
   outline: none;
 }
 
-#saveButton, #deleteButton {
+#newPageButton {
   width: auto;
   display: inline-block;
   padding: 6px 14px;
@@ -188,6 +188,7 @@ body {
   display: flex;
   flex-direction: column; /* stack vertically */
   gap: 16px;
+  min-width: 0;
 } 
 
 /**************************************************/
@@ -286,31 +287,39 @@ body {
 #meetingsPanel {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100%;   /* ensure it fills the parent vertically */
+  flex: 1;
+  min-width: 0;   /* critical */
+  min-height: 0;
+  align-items: stretch;
 }
 
+/* Container for the list of pages */
 .pages-list {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-
   display: flex;
   flex-direction: column;
   gap: 12px;
 
-  overflow-y: auto;
-}
-
-.page-box {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  background-color: var(--element-color);
+  flex: 1;           /* fill remaining vertical space */
+  min-height: 0;     /* critical */
+  min-width: 0;      /* critical */
+  overflow-y: auto;  /* vertical scroll if needed */
+  overflow-x: hidden;/* prevent horizontal scroll */
   width: 100%;
   box-sizing: border-box;
-  color: var(--element-title-color);
+}
 
+/* Each page card */
+.page-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  width: 100%;       /* always fill parent width */
+  min-width: 0;      /* prevent flex item from overflowing horizontally */
+  box-sizing: border-box;
+
+  background-color: var(--element-color);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 8px 12px;
@@ -320,23 +329,28 @@ body {
   transition: background-color 0.2s ease;
 }
 
-/* .page-box:hover {
+.page-box:hover {
   background-color: var(--highlight-color);
-} */
+}
 
+/* Container for icon + title */
 .page-info {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
+
   flex: 1;
+  min-width: 0;   /* prevents child from forcing card wider */
   overflow: hidden;
 }
 
+/* Page icon */
 .page-icon {
   font-size: 18px;
   flex-shrink: 0;
 }
 
+/* Page title text */
 .page-title {
   background: none;
   border: none;
@@ -345,17 +359,19 @@ body {
   font-weight: 600;
   cursor: pointer;
 
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;       
+  word-break: break-word;    
+  overflow-wrap: anywhere;
+
   text-align: left;
   padding: 0;
+
+  /* key: do not shrink below 0 and always take remaining space */
+  flex: 1;
+  min-width: 0;
 }
 
-.page-title:hover {
-  text-decoration: underline;
-}
-
+/* Delete button */
 .delete-page {
   width: 28px;
   height: 28px;
@@ -539,7 +555,11 @@ body {
   /* Not yet implemented */
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+
+  align-items: stretch;
+  gap: 12px;
 }
 
 .topic-box {
@@ -547,17 +567,15 @@ body {
   align-items: center;
   justify-content: space-between;
 
-  padding: 10px 14px;
-  border-radius: 12px;
-
+  background-color: var(--element-color);
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--element-title-color);
   border: 1px solid var(--border-color);
-  background: var(--card-bg);
-
-  transition: 0.2s ease;
-}
-
-.topic-box:hover {
-  transform: translateY(-1px);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 12px;
+  box-shadow: 0 2px 6px #00000020;
 }
 
 .topic-content {

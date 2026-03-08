@@ -45,7 +45,7 @@ export function buildPageCardHTML(page) {
     <div class="page-box" data-page-id="${page.page_number}">
       <div class="page-info">
         <span class="page-icon">📓</span>
-        <button class="page-title">
+        <button class="page-title" type="button">
           ${page.title || "Untitled Notebook"}
         </button>
       </div>

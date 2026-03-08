@@ -19,14 +19,14 @@ const titleArea = document.getElementById("titleArea");
 const messageArea = document.getElementById("messageArea");
 const textArea = document.getElementById("textBox");
 const sendBtn = document.getElementById("sendButton");
-const saveBtn = document.getElementById("saveButton");
+const newPageBtn = document.getElementById("newPageButton");
 
 /* TOPICS */
 const TOPICS = [
-  "theology",
-  "philosophy",
-  "psychology",
-  "neuroscience"
+  "Theology",
+  "Philosophy",
+  "Psychology",
+  "Neuroscience"
 ];
 
 /* =========================================================
@@ -58,14 +58,8 @@ function setupTopBar() {
   titleArea.addEventListener("blur", autoSaveTitle);
 
   /* New Page Button */
-  saveBtn.textContent = "New Page";
-  saveBtn.addEventListener("click", createNewPage);
-
-  /* Delete Button */
-  document.getElementById("deleteButton")
-    .addEventListener("click", deletePage);
+  newPageBtn.addEventListener("click", createNewPage);
 }
-
 
 async function autoSaveTitle() {
 
@@ -198,7 +192,7 @@ async function loadPage(pageId) {
 
     loadSourcesFromDB(data.urls);
 
-    loadTopics(data.topics);
+    setupTopicsPanel(data.topics);
 
   } catch (err) {
     console.error(err);
@@ -452,25 +446,21 @@ async function performSearch() {
    TOPICS PANEL
 ========================================================= */
 
-function setupTopicsPanel() {
+function setupTopicsPanel(selectedTopics = []) {
   const panel = document.getElementById("topicsList");
-
   panel.innerHTML = "";
 
   TOPICS.forEach(topic => {
-
     const wrapper = document.createElement("div");
-
     wrapper.innerHTML = buildTopicCardHTML(topic);
-
     const card = wrapper.firstElementChild;
-
     const checkbox = card.querySelector(".topic-checkbox");
 
+    // Check it if it's in selectedTopics
+    checkbox.checked = selectedTopics.includes(topic);
+
     checkbox.addEventListener("change", saveTopics);
-
     panel.appendChild(card);
-
   });
 }
 
@@ -489,15 +479,6 @@ async function saveTopics() {
     body: JSON.stringify({
       topics: selectedTopics
     })
-  });
-}
-
-function loadTopics(savedTopics = []) {
-
-  const checkboxes = document.querySelectorAll("#topicsList input");
-
-  checkboxes.forEach(cb => {
-    cb.checked = savedTopics.includes(cb.value);
   });
 }
 
