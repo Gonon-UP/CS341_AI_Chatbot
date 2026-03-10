@@ -5,10 +5,18 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 require("dotenv").config();
 
-var indexRouter = require('./routes/index');
+var searchWebRouter = require('./routes/searchWeb');
 var usersRouter = require('./routes/users');
 var saveURLRouter = require('./routes/saveURL');
 var loadURLRouter = require('./routes/loadURL');
+var deleteURLRouter = require('./routes/deleteURL');
+var savePageRouter = require('./routes/savePage');
+var loadPageRouter = require('./routes/loadPage');
+var loadPagesRouter = require('./routes/loadPages');
+var deletePageRouter = require('./routes/deletePage');
+var saveTitleRouter = require('./routes/saveTitle');
+var saveTopicsRouter = require('./routes/saveTopics');
+var loadTopicsRouter = require('./routes/loadTopics');
 
 var app = express();
 
@@ -22,10 +30,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
+app.use('/', searchWebRouter);
 app.use('/users', usersRouter);
 app.use('/', saveURLRouter);
 app.use('/', loadURLRouter);
+app.use('/', deleteURLRouter);
+app.use('/', savePageRouter);
+app.use('/', loadPageRouter);
+app.use('/', loadPagesRouter);
+app.use('/', deletePageRouter);
+app.use('/', saveTitleRouter);
+app.use('/', saveTopicsRouter);
+app.use('/', loadTopicsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -34,13 +50,11 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  console.error(err);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500).json({
+    error: err.message || "Server error"
+  });
 });
 
 module.exports = app;

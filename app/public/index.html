@@ -19,8 +19,12 @@
 <body>
     <!-- Container to separate Title and Row (where element are displayed) -->
     <div class="page">
-        <textarea class="title" id="titleArea" placeholder="Notebook Title"
-                  maxlength="50" rows="1"></textarea>
+        <div class="title-container">
+            <textarea class="title" id="titleArea" placeholder="Notebook Title"
+                      maxlength="50" rows="1"></textarea>
+
+            <button class="custom-button" id="newPageButton">New Page</button>
+        </div>
 
         <!-- Displays 3 sections (left, middle, right columns)
              with 25%, 50%, 25% of page width, respectively -->
@@ -32,7 +36,7 @@
 
                     <div class="child-content" id="sourcesPanel">
                         <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
-                        <div id="sourcesList" class="sources-list"></div>
+                        <div id="sourcesList" class="custom-list"></div>
 
                         <!-- IN ORDER TO SIGN IN: YOU NEED TO ADD TEST USERS -->
                         <!-- BEFORE SUBMISSION TO THE CLIENT, PUBLISH WEB IN "AUDIENCE" -->
@@ -45,7 +49,9 @@
                 <div class="child">
                     <div class="child-header">Previous Meetings</div>
 
-                    <div class="child-content" id="meetingsPanel"></div>
+                    <div class="child-content" id="meetingsPanel">
+			   <div id="pagesList" class="custom-list"></div>
+		    </div>
                 </div>
             </div>
 
@@ -73,7 +79,9 @@
                 <div class="child">
                     <div class="child-header">Topics</div>
 
-                    <div class="child-content" id="topicsPanel"></div>
+                    <div class="child-content" id="topicsPanel">
+                        <div id="topicsList" class="custom-list"></div>
+                    </div>
                 </div>
 
                 <div class="child">
