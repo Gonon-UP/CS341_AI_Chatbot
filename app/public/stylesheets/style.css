@@ -329,10 +329,6 @@ body {
   transition: background-color 0.2s ease;
 }
 
-.page-box:hover {
-  background-color: var(--highlight-color);
-}
-
 /* Container for icon + title */
 .page-info {
   display: flex;
@@ -369,6 +365,10 @@ body {
   /* key: do not shrink below 0 and always take remaining space */
   flex: 1;
   min-width: 0;
+}
+
+.page-title:hover {
+  text-decoration: underline;
 }
 
 /* Delete button */
