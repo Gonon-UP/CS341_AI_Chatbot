@@ -192,7 +192,11 @@ async function loadPage(pageId) {
 
     loadSourcesFromDB(data.urls);
 
-    setupTopicsPanel(data.topics);
+    // load topics separately
+    const topicResponse = await fetch(`/page/${pageId}/topics`);
+    const topicData = await topicResponse.json();
+	
+    setupTopicsPanel(topicData.topics);
 
   } catch (err) {
     console.error(err);
