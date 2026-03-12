@@ -206,6 +206,42 @@ body {
   gap: 12px;
 }
 
+.sources-controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.sources-controls .custom-button:first-child {
+  flex: 1;
+}
+
+/* Drive icon button */
+.drive-button {
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.drive-button:hover {
+  background-color: var(--highlight-color);
+}
+
+.drive-button img {
+  width: 22px;
+  height: 22px;
+}
+
 .source-box {
   display: flex;
   align-items: center;

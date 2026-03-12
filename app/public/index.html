@@ -35,12 +35,16 @@
                     <div class="child-header">Sources</div>
 
                     <div class="child-content" id="sourcesPanel">
-                        <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
-                        <div id="sourcesList" class="custom-list"></div>
+                        <div class="sources-controls">
+                            <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
 
-                        <!-- IN ORDER TO SIGN IN: YOU NEED TO ADD TEST USERS -->
-                        <!-- BEFORE SUBMISSION TO THE CLIENT, PUBLISH WEB IN "AUDIENCE" -->
-                        <button class="custom-button" id="googleDriveLogin" >Connect Google Drive</button>
+                            <button class="drive-button" id="googleDriveLogin">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/1/12/Google_Drive_icon_%282020%29.svg"
+                                    alt="Google Drive">
+                            </button>
+                        </div>
+
+                        <div id="sourcesList" class="custom-list"></div>
 
                         <div class="drive-status" id="driveStatus" style="display: none;"></div>
                     </div>
