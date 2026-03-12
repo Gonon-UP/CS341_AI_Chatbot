@@ -147,25 +147,27 @@ async function loadSavedPages() {
     pages.forEach(page => {
       const wrapper = document.createElement("div");
       wrapper.innerHTML = buildPageCardHTML(page);
-
       const card = wrapper.firstElementChild;
 
       const titleBtn = card.querySelector(".page-title");
       const deleteBtn = card.querySelector(".delete-page");
 
-      // Open page when clicking title
       titleBtn?.addEventListener("click", () => {
         loadPage(page.page_number);
       });
 
-      // Delete page when clicking X
       deleteBtn?.addEventListener("click", async (e) => {
-        e.stopPropagation(); // Prevent accidental bubbling
+        e.stopPropagation();
         await deletePage(page.page_number);
       });
 
       panel.appendChild(card);
     });
+
+    // AUTO-LOAD TOP PAGE if no currentPageId
+    if (!currentPageId && pages.length > 0) {
+      loadPage(pages[0].page_number);
+    }
 
   } catch (err) {
     console.error("Error loading saved pages:", err);
