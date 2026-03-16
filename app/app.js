@@ -17,6 +17,9 @@ var deletePageRouter = require('./routes/deletePage');
 var saveTitleRouter = require('./routes/saveTitle');
 var saveTopicsRouter = require('./routes/saveTopics');
 var loadTopicsRouter = require('./routes/loadTopics');
+var uploadDocumentRouter = require('./routes/uploadDocument');
+var getDocumentsRouter = require('./routes/getDocuments');
+var deleteDocumentRouter = require('./routes/deleteDocument');
 
 var app = express();
 
@@ -42,6 +45,9 @@ app.use('/', deletePageRouter);
 app.use('/', saveTitleRouter);
 app.use('/', saveTopicsRouter);
 app.use('/', loadTopicsRouter);
+app.use('/', uploadDocumentRouter);
+app.use('/', getDocumentsRouter);
+app.use('/', deleteDocumentRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

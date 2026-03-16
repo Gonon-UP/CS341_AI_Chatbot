@@ -1,0 +1,43 @@
+<!-- Document Upload Popup -->
+
+<div class="popup">
+    <h2>Upload Document</h2>
+    
+    <form id="uploadForm">
+        <input type="hidden" id="pageId" name="pageId" value="">
+        
+        <div class="form-group">
+            <label for="documentInput">Select File:</label>
+            <input 
+                type="file" 
+                id="documentInput" 
+                name="document" 
+                accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" 
+                required
+            >
+            <small>Max 50MB. Accepted: PDF, Word, Excel, PowerPoint, Text</small>
+        </div>
+
+        <div id="uploadProgress" class="progress-container" style="display: none;">
+            <div class="progress-bar-bg">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <p id="progressText">0%</p>
+        </div>
+
+        <div id="uploadMessage" class="upload-message" style="display: none;"></div>
+
+        <div class="button-group">
+            <button type="button" class="custom-button cancel" onclick="window.parent.closePopup()">Cancel</button>
+            <button type="submit" id="uploadBtn" class="custom-button" style="background-color: #4CAF50;">Upload</button>
+        </div>
+    </form>
+
+    <div class="documents-list">
+        <h3>Uploaded Documents:</h3>
+        <ul id="documentsUL"></ul>
+    </div>
+</div>
+
+<link rel="stylesheet" href="../stylesheets/documentPopup.css">
+<script src="../javascripts/documentPopup.js"></script>

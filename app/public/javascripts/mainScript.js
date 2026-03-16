@@ -334,6 +334,35 @@ async function addSources() {
     ?.addEventListener("click", closePopup);
 }
 
+/* =========================================================
+   DOCUMENTS PANEL
+========================================================= */
+
+async function addDocuments() {
+
+  if (!currentPageId) {
+    alert('Please select or create a page first');
+    return;
+  }
+
+  const overlay = document.getElementById("popupOverlay");
+
+  const response = await fetch("popups/documentPopup.html");
+  overlay.innerHTML = await response.text();
+  overlay.style.display = "flex";
+
+  // Wait for scripts to load and initialize
+  setTimeout(() => {
+    try {
+      if (window.initializePopup) {
+        window.initializePopup(currentPageId);
+      }
+    } catch (err) {
+      console.error('Error initializing document popup:', err);
+    }
+  }, 100);
+}
+
 async function saveSource(preFetchedTitle = null, directUrl = null) {
 
   const url = directUrl ||
@@ -493,5 +522,7 @@ async function saveTopics() {
 ========================================================= */
 
 window.addSources = addSources;
+window.addDocuments = addDocuments;
 window.saveSource = saveSource;
 window.performSearch = performSearch;
+window.closePopup = closePopup;
