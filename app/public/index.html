@@ -10,8 +10,8 @@
     <!-- Name of browser and necessary .css file -->
     <title>Research Chatbot</title>
     <link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="stylesheet" href="stylesheets/popupStyle.css">
-    <link rel="stylesheet" href="stylesheets/upload-modal.css">
+    <link rel="stylesheet" href="stylesheets/sourcePopup.css">
+    <link rel="stylesheet" href="stylesheets/documentPopup.css">
 
     <!-- Google itentity services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -40,9 +40,7 @@
                         <div id="sourcesList" class="custom-list"></div>
 
                         <!-- Replace Google Drive with Document Upload -->
-                        <button class="custom-button" id="addDocuments()">↑</button>
-
-                        <div class="drive-status" id="driveStatus" style="display: none;"></div>
+                        <button class="custom-button" onclick="addDocuments()">↑</button>
                     </div>
                 </div>
 

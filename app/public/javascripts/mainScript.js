@@ -347,7 +347,7 @@ async function addDocuments() {
 
   const overlay = document.getElementById("popupOverlay");
 
-  const response = await fetch("popups/documentPopup.html");
+  const response = await fetch("popups/addDocuments.html");
   overlay.innerHTML = await response.text();
   overlay.style.display = "flex";
 
