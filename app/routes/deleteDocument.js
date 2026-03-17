@@ -1,49 +1,45 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
-const fs = require("fs").promises;
 const db = require("../dbms");
+const fs = require("fs");
+const path = require("path");
 
-/**
- * DELETE /document/:documentId
- * - Deletes the document row from the DB
- * - Deletes the file from disk (app/public/documents/<pageId>/...)
- */
-router.delete("/document/:documentId", async (req, res) => {
-  const documentId = req.params.documentId;
+router.delete("/document/:id", (req, res) => {
+  const document_id = req.params.id;
 
-  if (!documentId) {
-    return res.status(400).json({ error: "Missing documentId" });
-  }
+  const getQuery = `
+    SELECT * FROM documents WHERE document_id = ?;
+  `;
 
-  try {
-    // 1) Look up the document so we know what file to delete
-    const [rows] = await db.query(
-      "SELECT document_id, file_path FROM documents WHERE document_id = ?",
-      [documentId]
-    );
-
-    if (!rows || rows.length === 0) {
+  db.dbquery(getQuery, [document_id], (err, results) => {
+    if (err || results.length === 0) {
       return res.status(404).json({ error: "Document not found" });
     }
 
-    const doc = rows[0];
+    const doc = results[0];
 
-    // 2) Delete DB row first (so it disappears from UI even if file deletion fails)
-    await db.query("DELETE FROM documents WHERE document_id = ?", [documentId]);
+    const fullPath = path.join(process.cwd(), doc.file_path);
 
-    // 3) Delete the file from disk (ignore errors if it's already missing)
-    if (doc.file_path) {
-      // Safety: normalize to avoid weird paths
-      const filePath = path.normalize(doc.file_path);
-      await fs.unlink(filePath).catch(() => {});
-    }
+    // Delete file from disk
+    fs.unlink(fullPath, (fsErr) => {
+      if (fsErr) {
+        console.warn("File delete warning:", fsErr.message);
+        // continue anyway (DB still needs cleanup)
+      }
 
-    return res.json({ message: "Document deleted successfully" });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Delete failed", details: err.message });
-  }
+      const deleteQuery = `
+        DELETE FROM documents WHERE document_id = ?;
+      `;
+
+      db.dbquery(deleteQuery, [document_id], (err2) => {
+        if (err2) {
+          return res.status(500).json({ error: "Delete failed" });
+        }
+
+        res.json({ success: true });
+      });
+    });
+  });
 });
 
 module.exports = router;

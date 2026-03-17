@@ -1,25 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const db = require('../dbms');
+const db = require("../dbms");
 
-router.get("/getDocuments/:pageId", async (req, res) => {
-    const pageId = req.params.pageId;
+router.get("/getDocuments", (req, res) => {
+  const page_number = req.query.pageId;
+  if (!page_number) return res.status(400).json({ error: "Missing pageId" });
 
-    try {
-        // Get all documents for this page
-        const [documents] = await db.query(
-            "SELECT document_id, page_number, original_name, file_size, upload_date FROM documents WHERE page_number = ? ORDER BY upload_date DESC",
-            [pageId]
-        );
+  const selectQuery = `
+    SELECT document_id, original_name, file_name, file_path, file_size, upload_date
+    FROM documents
+    WHERE page_number = ?
+    ORDER BY upload_date ASC
+  `;
 
-        res.json({
-            documents: documents
-        });
-
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Failed to fetch documents", details: err.message });
+  db.dbquery(selectQuery, [page_number], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Database query failed" });
     }
+
+    res.json({ success: true, documents: results });
+  });
 });
 
 module.exports = router;

@@ -197,7 +197,7 @@ async function loadPage(pageId) {
     // load topics separately
     const topicResponse = await fetch(`/page/${pageId}/topics`);
     const topicData = await topicResponse.json();
-	
+
     setupTopicsPanel(topicData.topics);
 
   } catch (err) {
@@ -302,7 +302,7 @@ async function getBotReply(query) {
 
 async function addSources() {
 
-  const overlay = document.getElementById("popupOverlay");
+  const overlay = document.getElementById("sourcesPopup");
 
   const response = await fetch("popups/addSources.html");
   overlay.innerHTML = await response.text();
@@ -331,123 +331,22 @@ async function addSources() {
   });
 
   overlay.querySelector("#closeButton")
-    ?.addEventListener("click", closePopup);
-}
-
-/* =========================================================
-   DOCUMENTS PANEL
-========================================================= */
-
-async function addDocuments() {
-
-  if (!currentPageId) {
-    alert('Please select or create a page first');
-    return;
-  }
-
-  const overlay = document.getElementById("popupOverlay");
-
-  const response = await fetch("popups/addDocuments.html");
-  overlay.innerHTML = await response.text();
-  overlay.style.display = "flex";
-
-  // Wait for scripts to load and initialize
-  setTimeout(() => {
-    try {
-      if (window.initializePopup) {
-        window.initializePopup(currentPageId);
-      }
-    } catch (err) {
-      console.error('Error initializing document popup:', err);
-    }
-  }, 100);
-}
-
-async function saveSource(preFetchedTitle = null, directUrl = null) {
-
-  const url = directUrl ||
-    document.getElementById("sourceInput").value.trim();
-
-  if (!url) return;
-
-  try {
-
-    const response = await fetch("/api/save", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        page_number: currentPageId,
-        title: preFetchedTitle || url,
-        url
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.success) loadSources(currentPageId);
-
-  } catch (err) {
-    console.error("Save failed:", err);
-  }
-
-  closePopup();
-}
-
-async function loadSources(pageNumber) {
-
-  try {
-
-    const response = await fetch(`/api/urls/${pageNumber}`);
-    const data = await response.json();
-
-    const panel = document.getElementById("sourcesList");
-    panel.innerHTML = "";
-
-    data.urls.forEach(item => {
-
-      const wrapper = document.createElement("div");
-
-      wrapper.innerHTML = buildSourceCardHTML(
-        item.url,
-        item.title,
-        item.url_order
-      );
-
-      const box = wrapper.firstElementChild;
-
-      box.querySelector(".remove-source")
-        ?.addEventListener("click", async () => {
-
-          await fetch(`/api/delete/${pageNumber}/${item.url_order}`, {
-            method: "DELETE"
-          });
-
-          loadSources(pageNumber);
-        });
-
-      panel.appendChild(box);
-    });
-
-  } catch (err) {
-    console.error("Failed to load resources:", err);
-  }
+    ?.addEventListener("click", closeSourcesPopup);
 }
 
 /* =========================================================
    POPUP UTILITIES
 ========================================================= */
 
-function closePopup() {
-  const overlay = document.getElementById("popupOverlay");
+function closeSourcesPopup() {
+  const overlay = document.getElementById("sourcesPopup");
   overlay.style.display = "none";
   overlay.innerHTML = "";
 }
 
 async function performSearch() {
 
-  const overlay = document.getElementById("popupOverlay");
+  const overlay = document.getElementById("sourcesPopup");
   const query = overlay.querySelector("#webSearch").value.trim();
   const resultsContainer = overlay.querySelector("#searchResults");
 
@@ -474,6 +373,139 @@ async function performSearch() {
   } catch (err) {
 
     resultsContainer.innerHTML = "Search failed.";
+  }
+}
+
+// ---------------------------
+// DOCUMENT POPUP FUNCTIONS
+// ---------------------------
+
+// Open the document upload popup
+export function addDocuments(pageId) {
+  const popup = document.getElementById("documentPopup");
+  const iframe = document.getElementById("popupFrame2");
+
+  // Load the popup HTML
+  iframe.src = "html/addDocuments.html"; // adjust path if needed
+  popup.style.display = "flex";
+
+  iframe.onload = () => {
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+    // Set pageId
+    const pageInput = iframeDoc.getElementById("pageId");
+    pageInput.value = pageId || "";
+
+    // Cancel button
+    const cancelBtn = iframeDoc.getElementById("cancelBtn");
+    cancelBtn.onclick = () => closePopup();
+
+    // Form submission
+    const uploadForm = iframeDoc.getElementById("uploadForm");
+    uploadForm.onsubmit = async (e) => {
+      e.preventDefault();
+      await uploadDocument(iframeDoc);
+    };
+
+    // LOAD EXISTING DOCUMENTS
+    const ul = iframeDoc.getElementById("documentsUL");
+    ul.innerHTML = ""; // clear old list
+
+    fetch(`/getDocuments?pageId=${pageId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          data.documents.forEach(doc => {
+            const li = document.createElement("li");
+            li.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
+            ul.appendChild(li);
+          });
+        }
+      })
+      .catch(err => console.error(err));
+  };
+}
+
+// Close the popup
+export function closePopup() {
+  const popup = document.getElementById("documentPopup");
+  const iframe = document.getElementById("popupFrame2");
+
+  popup.style.display = "none";
+  iframe.src = "";
+}
+
+// Upload document function
+async function uploadDocument(iframeDoc) {
+  const form = iframeDoc.getElementById("uploadForm");
+  const fileInput = iframeDoc.getElementById("documentInput");
+  const pageId = form.pageId.value;
+
+  if (!fileInput.files.length) return;
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append("document", file);
+  formData.append("pageId", pageId);
+
+  const progressContainer = iframeDoc.getElementById("uploadProgress");
+  const progressBar = iframeDoc.getElementById("progressBar");
+  const progressText = iframeDoc.getElementById("progressText");
+  const uploadMessage = iframeDoc.getElementById("uploadMessage");
+
+  progressContainer.style.display = "block";
+  progressBar.style.width = "0%";
+  progressText.textContent = "0%";
+  uploadMessage.style.display = "none";
+
+  try {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/uploadDocument", true);
+
+    // Track upload progress
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        progressBar.style.width = percent + "%";
+        progressText.textContent = percent + "%";
+      }
+    };
+
+    xhr.onload = () => {
+      progressContainer.style.display = "none";
+
+      if (xhr.status === 200) {
+        const res = JSON.parse(xhr.responseText);
+
+        if (res.success) {
+          uploadMessage.style.display = "block";
+          uploadMessage.textContent = "Upload successful!";
+
+          // Add uploaded file to the list
+          const ul = iframeDoc.getElementById("documentsUL");
+          const li = document.createElement("li");
+          li.textContent = `${res.document.original_name} (${Math.round(res.document.file_size / 1024)} KB)`;
+          ul.appendChild(li);
+
+          // Clear the file input
+          fileInput.value = "";
+
+        } else {
+          uploadMessage.style.display = "block";
+          uploadMessage.textContent = "Upload failed: " + (res.error || "Unknown error");
+        }
+      } else {
+        uploadMessage.style.display = "block";
+        uploadMessage.textContent = "Upload failed with status " + xhr.status;
+      }
+    };
+
+    xhr.send(formData);
+
+  } catch (err) {
+    progressContainer.style.display = "none";
+    uploadMessage.style.display = "block";
+    uploadMessage.textContent = "Error: " + err.message;
   }
 }
 
@@ -522,7 +554,6 @@ async function saveTopics() {
 ========================================================= */
 
 window.addSources = addSources;
-window.addDocuments = addDocuments;
 window.saveSource = saveSource;
 window.performSearch = performSearch;
-window.closePopup = closePopup;
+window.closeSourcesPopup = closeSourcesPopup;

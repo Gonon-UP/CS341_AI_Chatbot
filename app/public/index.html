@@ -137,11 +137,19 @@
 
 <!-- JavaScript files (separate scripts for popups) -->
 <script type="module" src="javascripts/mainScript.js"></script>
-<script src="javascripts/documentPopup.js"></script>
 
-<div id="popupOverlay" class="popup-overlay">
+<div id="sourcesPopup" class="popup-overlay">
     <iframe
-        id="popupFrame"
+        id="popupFrame1"
+        src=""
+        frameborder="0"
+        style="width: 420px; height: 260px; border-radius: 16px; background: white;">
+    </iframe>
+</div>
+
+<div id="documentPopup" class="popup-overlay">
+    <iframe
+        id="popupFrame2"
         src=""
         frameborder="0"
         style="width: 420px; height: 260px; border-radius: 16px; background: white;">
