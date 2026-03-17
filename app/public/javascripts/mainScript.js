@@ -377,28 +377,19 @@ async function performSearch() {
 }
 
 // ---------------------------
-// MAIN SCRIPT (updated for document popup)
-// ---------------------------
-
-// GLOBAL PAGE ID
-let currentPageId = null; // make sure you update this when user selects/creates a page
-
-// ---------------------------
 // DOCUMENT POPUP FUNCTIONS
 // ---------------------------
 
 // Open the document upload popup
-window.addDocuments = function(pageId) {
-    if (!pageId) {
-        console.error("No page selected!");
-        return;
-    }
+function addDocuments() {
+    pageId = currentPageId;
+    print("current page ID: ", currentPageId);
 
     const popup = document.getElementById("documentPopup");
     const iframe = document.getElementById("popupFrame2");
 
     // Correct relative path to your popup
-    iframe.src = "../popups/addDocuments.html";
+    iframe.src = "popups/addDocuments.html";
     popup.style.display = "flex";
 
     iframe.onload = () => {
@@ -438,7 +429,7 @@ window.addDocuments = function(pageId) {
 };
 
 // Close the popup
-window.closeDocPopup = function() {
+function closeDocPopup() {
     const popup = document.getElementById("documentPopup");
     const iframe = document.getElementById("popupFrame2");
 
@@ -557,3 +548,5 @@ window.addSources = addSources;
 window.saveSource = saveSource;
 window.performSearch = performSearch;
 window.closeSourcesPopup = closeSourcesPopup;
+window.closeDocPopup = closeDocPopup;
+window.addDocuments = addDocuments;
