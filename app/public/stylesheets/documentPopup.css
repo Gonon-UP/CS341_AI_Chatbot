@@ -1,173 +1,215 @@
-/* Form Groups */
+/* ================= FORM GROUP ================= */
+
 .form-group {
     margin: 15px 0;
+    width: 100%;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #333;
-    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--element-title-color);
+    font-size: 12px;
 }
 
+/* File input styled like your UI */
 .form-group input[type="file"] {
     width: 100%;
-    padding: 8px;
-    border: 2px solid #ddd;
-    border-radius: 4px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
     font-size: 12px;
-    transition: border-color 0.3s;
+    background-color: var(--background-color);
+    color: white;
     box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-group input[type="file"]:hover {
+    background-color: var(--highlight-color);
 }
 
 .form-group input[type="file"]:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: white;
 }
 
 .form-group small {
     display: block;
-    color: #666;
-    margin-top: 5px;
-    font-size: 11px;
+    color: #aaa;
+    margin-top: 4px;
+    font-size: 10px;
 }
 
-/* Progress Bar */
+/* ================= PROGRESS BAR ================= */
+
 .progress-container {
     margin: 15px 0;
 }
 
 .progress-bar-bg {
     width: 100%;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    height: 20px;
+    background-color: var(--background-color);
+    border-radius: 12px;
+    height: 16px;
     overflow: hidden;
+    border: 1px solid var(--border-color);
 }
 
 .progress-bar {
     width: 0%;
-    background: linear-gradient(90deg, #4CAF50, #45a049);
     height: 100%;
-    border-radius: 4px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--highlight-color), #5e41a0);
     transition: width 0.3s ease;
 }
 
 #progressText {
     text-align: center;
     margin-top: 5px;
-    font-weight: bold;
-    color: #333;
-    font-size: 12px;
+    font-weight: 600;
+    color: var(--element-title-color);
+    font-size: 11px;
 }
 
-/* Upload Message */
+/* ================= UPLOAD MESSAGE ================= */
+
 .upload-message {
     padding: 10px 12px;
-    border-radius: 4px;
+    border-radius: 12px;
     margin: 12px 0;
-    border-left: 4px solid;
     font-size: 12px;
+    border: 1px solid;
 }
 
+/* success */
 .upload-message.success {
-    background-color: #d4edda;
-    color: #155724;
-    border-left-color: #28a745;
+    background-color: #2a2140;   /* darker purple */
+    color: #cbb6ff;              /* soft light purple text */
+    border-color: var(--border-color);
 }
 
+/* error */
 .upload-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-left-color: #dc3545;
+    background-color: #3d1f2b;
+    color: #ff9aa2;
+    border-color: #dc3545;
 }
 
-/* Buttons */
+/* ================= BUTTONS ================= */
+
 .button-group {
-    text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
     margin-top: 15px;
 }
 
+/* inherits your custom-button */
 .button-group .custom-button {
-    padding: 8px 15px;
-    margin-left: 8px;
+    width: auto;
+    padding: 6px 14px;
+    height: 36px;
     font-size: 12px;
 }
 
 .button-group .custom-button.cancel {
-    background-color: #999;
+    background-color: #444;
 }
 
 .button-group .custom-button:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Documents List */
+/* ================= DOCUMENTS LIST ================= */
+
 .documents-list {
     margin-top: 20px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--background-color);
     padding-top: 15px;
+    width: 100%;
 }
 
 .documents-list h3 {
-    margin: 0 0 10px 0;
-    color: #333;
+    margin-bottom: 10px;
+    color: var(--element-title-color);
     font-size: 13px;
 }
 
+/* match your scrollable list style */
 #documentsUL {
     list-style: none;
     padding: 0;
     margin: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    max-height: 200px;
+    overflow-y: auto;
 }
 
+/* individual document card (matches page-box/source-box) */
 #documentsUL li {
-    padding: 8px;
-    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background-color 0.2s;
-    font-size: 11px;
+
+    background-color: var(--element-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+
+    padding: 8px 12px;
+    gap: 10px;
+
+    box-shadow: 0 2px 6px #00000020;
+    transition: background-color 0.2s ease;
 }
 
 #documentsUL li:hover {
-    background-color: #f9f9f9;
+    background-color: var(--highlight-color);
 }
 
-#documentsUL li:last-child {
-    border-bottom: none;
-}
-
+/* text content */
 #documentsUL li strong {
     display: block;
-    color: #333;
-    margin-bottom: 3px;
-    word-break: break-word;
+    color: var(--element-title-color);
     font-size: 12px;
+
+    word-break: break-word;
 }
 
 #documentsUL li small {
-    color: #999;
+    color: #aaa;
     font-size: 10px;
 }
 
+/* delete button (matches your circular UI buttons) */
 #documentsUL .btn-delete {
-    background-color: #dc3545;
-    color: white;
-    padding: 4px 8px;
-    font-size: 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-left: 8px;
+    width: 28px;
+    height: 28px;
+
+    border-radius: 50%;
     border: none;
-    border-radius: 3px;
+
+    background-color: var(--highlight-color);
+    color: white;
+
+    font-size: 14px;
     cursor: pointer;
-    transition: background-color 0.3s;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
 }
 
 #documentsUL .btn-delete:hover {
-    background-color: #c82333;
+    background-color: #5e41a0;
 }

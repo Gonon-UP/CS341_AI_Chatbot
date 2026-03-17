@@ -321,13 +321,6 @@ async function addSources() {
   resultsContainer.addEventListener("click", (e) => {
 
     const btn = e.target.closest(".select-result-btn");
-
-    if (btn) {
-      saveSource(
-        btn.dataset.title,
-        btn.dataset.url
-      );
-    }
   });
 
   overlay.querySelector("#closeButton")
@@ -381,7 +374,7 @@ async function addDocuments() {
   const pageId = currentPageId;
   console.log("current page ID: ", currentPageId);
 
-  const overlay = document.getElementById("documentPopup");
+  const overlay = document.getElementById("documentsPopup");
 
   const response = await fetch("popups/addDocuments.html");
   overlay.innerHTML = await response.text();
@@ -394,8 +387,8 @@ async function addDocuments() {
   }
 
   // Cancel button closes popup
-  const cancelBtn = overlay.querySelector("#cancelBtn");
-  cancelBtn.onclick = () => closeDocPopup();
+  const cancelBtn = overlay.querySelector("#cancelBtn")
+    ?.addEventListener("click", closeDocPopup);
 
   // Form submission
   const uploadForm = overlay.querySelector("#uploadForm");
@@ -433,7 +426,8 @@ function closeDocPopup() {
 // ---------------------------
 // UPLOAD DOCUMENT FUNCTION
 // ---------------------------
-async function uploadDocument(overlay, pageId) {
+async function uploadDocument(pageId) {
+  const overlay = document.getElementById("documentsPopup");
   const fileInput = overlay.querySelector("#documentInput");
   if (!fileInput.files.length) return;
 
@@ -538,7 +532,7 @@ async function saveTopics() {
 ========================================================= */
 
 window.addSources = addSources;
-window.saveSource = saveSource;
+//window.saveSource = saveSource;
 window.performSearch = performSearch;
 window.closeSourcesPopup = closeSourcesPopup;
 window.closeDocPopup = closeDocPopup;
