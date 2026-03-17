@@ -377,136 +377,136 @@ async function performSearch() {
 }
 
 // ---------------------------
+// MAIN SCRIPT (updated for document popup)
+// ---------------------------
+
+// GLOBAL PAGE ID
+let currentPageId = null; // make sure you update this when user selects/creates a page
+
+// ---------------------------
 // DOCUMENT POPUP FUNCTIONS
 // ---------------------------
 
 // Open the document upload popup
-export function addDocuments(pageId) {
-  const popup = document.getElementById("documentPopup");
-  const iframe = document.getElementById("popupFrame2");
+window.addDocuments = function(pageId) {
+    if (!pageId) {
+        console.error("No page selected!");
+        return;
+    }
 
-  // Load the popup HTML
-  iframe.src = "html/addDocuments.html"; // adjust path if needed
-  popup.style.display = "flex";
+    const popup = document.getElementById("documentPopup");
+    const iframe = document.getElementById("popupFrame2");
 
-  iframe.onload = () => {
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+    // Correct relative path to your popup
+    iframe.src = "../popups/addDocuments.html";
+    popup.style.display = "flex";
 
-    // Set pageId
-    const pageInput = iframeDoc.getElementById("pageId");
-    pageInput.value = pageId || "";
+    iframe.onload = () => {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-    // Cancel button
-    const cancelBtn = iframeDoc.getElementById("cancelBtn");
-    cancelBtn.onclick = () => closePopup();
+        // Set hidden input for pageId
+        const pageInput = iframeDoc.getElementById("pageId");
+        pageInput.value = pageId;
 
-    // Form submission
-    const uploadForm = iframeDoc.getElementById("uploadForm");
-    uploadForm.onsubmit = async (e) => {
-      e.preventDefault();
-      await uploadDocument(iframeDoc);
+        // Cancel button closes popup
+        const cancelBtn = iframeDoc.getElementById("cancelBtn");
+        cancelBtn.onclick = () => closeDocPopup();
+
+        // Form submission
+        const uploadForm = iframeDoc.getElementById("uploadForm");
+        uploadForm.onsubmit = async (e) => {
+            e.preventDefault();
+            await uploadDocument(iframeDoc, pageId);
+        };
+
+        // Load previously uploaded documents for this page
+        const ul = iframeDoc.getElementById("documentsUL");
+        ul.innerHTML = ""; // clear old list
+        fetch(`/getDocuments?pageId=${pageId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    data.documents.forEach(doc => {
+                        const li = document.createElement("li");
+                        li.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
+                        ul.appendChild(li);
+                    });
+                }
+            })
+            .catch(err => console.error(err));
     };
-
-    // LOAD EXISTING DOCUMENTS
-    const ul = iframeDoc.getElementById("documentsUL");
-    ul.innerHTML = ""; // clear old list
-
-    fetch(`/getDocuments?pageId=${pageId}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          data.documents.forEach(doc => {
-            const li = document.createElement("li");
-            li.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
-            ul.appendChild(li);
-          });
-        }
-      })
-      .catch(err => console.error(err));
-  };
-}
+};
 
 // Close the popup
-export function closePopup() {
-  const popup = document.getElementById("documentPopup");
-  const iframe = document.getElementById("popupFrame2");
+window.closeDocPopup = function() {
+    const popup = document.getElementById("documentPopup");
+    const iframe = document.getElementById("popupFrame2");
 
-  popup.style.display = "none";
-  iframe.src = "";
-}
+    popup.style.display = "none";
+    iframe.src = "";
+};
 
-// Upload document function
-async function uploadDocument(iframeDoc) {
-  const form = iframeDoc.getElementById("uploadForm");
-  const fileInput = iframeDoc.getElementById("documentInput");
-  const pageId = form.pageId.value;
+// ---------------------------
+// UPLOAD DOCUMENT FUNCTION
+// ---------------------------
+async function uploadDocument(iframeDoc, pageId) {
+    const fileInput = iframeDoc.getElementById("documentInput");
+    if (!fileInput.files.length) return;
 
-  if (!fileInput.files.length) return;
+    const file = fileInput.files[0];
+    const formData = new FormData();
+    formData.append("document", file);
+    formData.append("pageId", pageId); // send the correct pageId
 
-  const file = fileInput.files[0];
-  const formData = new FormData();
-  formData.append("document", file);
-  formData.append("pageId", pageId);
-
-  const progressContainer = iframeDoc.getElementById("uploadProgress");
-  const progressBar = iframeDoc.getElementById("progressBar");
-  const progressText = iframeDoc.getElementById("progressText");
-  const uploadMessage = iframeDoc.getElementById("uploadMessage");
-
-  progressContainer.style.display = "block";
-  progressBar.style.width = "0%";
-  progressText.textContent = "0%";
-  uploadMessage.style.display = "none";
-
-  try {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/uploadDocument", true);
 
-    // Track upload progress
+    const progressContainer = iframeDoc.getElementById("uploadProgress");
+    const progressBar = iframeDoc.getElementById("progressBar");
+    const progressText = iframeDoc.getElementById("progressText");
+    const uploadMessage = iframeDoc.getElementById("uploadMessage");
+
+    progressContainer.style.display = "block";
+    progressBar.style.width = "0%";
+    progressText.textContent = "0%";
+    uploadMessage.style.display = "none";
+
+    // Track progress
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percent = Math.round((event.loaded / event.total) * 100);
-        progressBar.style.width = percent + "%";
-        progressText.textContent = percent + "%";
-      }
+        if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            progressBar.style.width = percent + "%";
+            progressText.textContent = percent + "%";
+        }
     };
 
     xhr.onload = () => {
-      progressContainer.style.display = "none";
+        progressContainer.style.display = "none";
+        if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success) {
+                uploadMessage.style.display = "block";
+                uploadMessage.textContent = "Upload successful!";
 
-      if (xhr.status === 200) {
-        const res = JSON.parse(xhr.responseText);
+                // Add uploaded file to the list
+                const ul = iframeDoc.getElementById("documentsUL");
+                const li = document.createElement("li");
+                li.textContent = `${res.document.original_name} (${Math.round(res.document.file_size / 1024)} KB)`;
+                ul.appendChild(li);
 
-        if (res.success) {
-          uploadMessage.style.display = "block";
-          uploadMessage.textContent = "Upload successful!";
-
-          // Add uploaded file to the list
-          const ul = iframeDoc.getElementById("documentsUL");
-          const li = document.createElement("li");
-          li.textContent = `${res.document.original_name} (${Math.round(res.document.file_size / 1024)} KB)`;
-          ul.appendChild(li);
-
-          // Clear the file input
-          fileInput.value = "";
-
+                // Clear file input
+                fileInput.value = "";
+            } else {
+                uploadMessage.style.display = "block";
+                uploadMessage.textContent = "Upload failed: " + (res.error || "Unknown error");
+            }
         } else {
-          uploadMessage.style.display = "block";
-          uploadMessage.textContent = "Upload failed: " + (res.error || "Unknown error");
+            uploadMessage.style.display = "block";
+            uploadMessage.textContent = "Upload failed with status " + xhr.status;
         }
-      } else {
-        uploadMessage.style.display = "block";
-        uploadMessage.textContent = "Upload failed with status " + xhr.status;
-      }
     };
 
     xhr.send(formData);
-
-  } catch (err) {
-    progressContainer.style.display = "none";
-    uploadMessage.style.display = "block";
-    uploadMessage.textContent = "Error: " + err.message;
-  }
 }
 
 /* =========================================================
