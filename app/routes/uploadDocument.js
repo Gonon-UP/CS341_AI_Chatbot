@@ -33,7 +33,9 @@ router.post("/uploadDocument", upload.single("document"), (req, res) => {
 
   if (!file) return res.status(400).json({ error: "No file uploaded" });
 
-  const filePath = `uploads/${page_number}/${file.filename}`;
+  const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+
+  const filePath = `uploads/${page_number}/${safeName}`;
 
   const insertQuery = `
     INSERT INTO documents
@@ -43,7 +45,7 @@ router.post("/uploadDocument", upload.single("document"), (req, res) => {
 
   db.dbquery(
     insertQuery,
-    [page_number, file.filename, file.originalname, filePath, file.size],
+    [page_number, safeName, safeName, filePath, file.size],
     (err) => {
       if (err) {
         console.error(err);
@@ -55,7 +57,7 @@ router.post("/uploadDocument", upload.single("document"), (req, res) => {
         success: true,
         document: {
           page_number,
-          file_name: file.filename,
+          file_name: safeName,
           original_name: file.originalname,
           file_path: filePath,
           file_size: file.size

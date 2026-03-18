@@ -177,39 +177,39 @@
 /* text content */
 #documentsUL li strong {
     display: block;
-    color: var(--element-title-color);
+    color: white;
     font-size: 12px;
 
     word-break: break-word;
 }
 
 #documentsUL li small {
-    color: #aaa;
+    color: white;
     font-size: 10px;
 }
 
-/* delete button (matches your circular UI buttons) */
 #documentsUL .btn-delete {
-    width: 28px;
-    height: 28px;
+  width: 28px;
+  height: 28px;
 
-    border-radius: 50%;
-    border: none;
+  border-radius: 50%;
+  border: none;
 
-    background-color: var(--highlight-color);
-    color: white;
+  background-color: var(--highlight-color);
+  color: white;
 
-    font-size: 14px;
-    cursor: pointer;
+  font-size: 16px;
+  cursor: pointer;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    flex-shrink: 0;
-    transition: background-color 0.2s ease;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
 }
 
 #documentsUL .btn-delete:hover {
-    background-color: #5e41a0;
+  background-color: #5e41a0;
 }
+

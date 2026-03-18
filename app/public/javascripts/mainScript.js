@@ -318,10 +318,49 @@ async function addSources() {
     }
   });
 
-  resultsContainer.addEventListener("click", (e) => {
+  resultsContainer.addEventListener("click", async (e) => {
 
-    const btn = e.target.closest(".select-result-btn");
-  });
+  const btn = e.target.closest(".select-result-btn");
+  if (!btn) return;
+
+  const card = btn.closest(".result-card");
+
+  const url = card.querySelector("a")?.href;
+  const title = card.querySelector(".result-title")?.textContent;
+
+  if (!url || !title || !currentPageId) return;
+
+  try {
+    const res = await fetch(`/api/save`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        page_number: currentPageId,
+        url,
+        title
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Add to sources panel immediately
+      const panel = document.getElementById("sourcesList");
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
+
+      panel.appendChild(wrapper.firstElementChild);
+    }
+
+  } catch (err) {
+    console.error("Error adding source:", err);
+  }
+ 
+  closeSourcesPopup();
+});
 
   overlay.querySelector("#closeButton")
     ?.addEventListener("click", closeSourcesPopup);
@@ -370,9 +409,10 @@ async function performSearch() {
 // ---------------------------
 
 // Open the document upload popup
+// Open the document upload popup
 async function addDocuments() {
   const pageId = currentPageId;
-  console.log("current page ID: ", currentPageId);
+  console.log("current page ID:", currentPageId);
 
   const overlay = document.getElementById("documentsPopup");
 
@@ -382,12 +422,10 @@ async function addDocuments() {
 
   // Set hidden input for pageId
   const pageInput = overlay.querySelector("#pageId");
-  if (pageInput) {
-    pageInput.value = pageId;
-  }
+  if (pageInput) pageInput.value = pageId;
 
   // Cancel button closes popup
-  const cancelBtn = overlay.querySelector("#cancelBtn")
+  overlay.querySelector("#cancelBtn")
     ?.addEventListener("click", closeDocPopup);
 
   // Form submission
@@ -400,21 +438,60 @@ async function addDocuments() {
   // Load previously uploaded documents for this page
   const ul = overlay.querySelector("#documentsUL");
   ul.innerHTML = ""; // clear old list
+
   try {
     const res = await fetch(`/getDocuments?pageId=${pageId}`);
     const data = await res.json();
 
     if (data.success) {
-      data.documents.forEach(doc => {
-        const li = document.createElement("li");
-        li.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
-        ul.appendChild(li);
-      });
+      data.documents.forEach(doc => addDocumentListItem(ul, doc));
     }
   } catch (err) {
     console.error(err);
   }
-};
+}
+
+// Add a document <li> to the UL with delete button and click-to-open
+function addDocumentListItem(ul, doc) {
+  const li = document.createElement("li");
+  li.className = "document-item";
+
+  // Clickable link to open document in a new tab
+  const link = document.createElement("a");
+  link.href = `/uploads/${doc.page_number || currentPageId}/${doc.file_name}`; // path to file
+  link.target = "_blank"; // open in new tab
+  link.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
+  link.className = "document-link";
+
+  // Remove button
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "×";
+  removeBtn.className = "remove-document";
+
+  removeBtn.addEventListener("click", async (e) => {
+    e.stopPropagation(); // prevent link click
+    removeBtn.disabled = true;
+
+    try {
+      const res = await fetch(`/document/${doc.document_id}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (data.success) {
+        li.remove(); // remove from DOM
+      } else {
+        console.error("Delete failed:", data.error);
+        removeBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      removeBtn.disabled = false;
+    }
+  });
+
+  li.appendChild(link);
+  li.appendChild(removeBtn);
+  ul.appendChild(li);
+}
 
 // Close the popup
 function closeDocPopup() {
@@ -449,7 +526,6 @@ async function uploadDocument(pageId) {
   progressText.textContent = "0%";
   uploadMessage.style.display = "none";
 
-  // Track progress
   xhr.upload.onprogress = (event) => {
     if (event.lengthComputable) {
       const percent = Math.round((event.loaded / event.total) * 100);
@@ -466,11 +542,9 @@ async function uploadDocument(pageId) {
         uploadMessage.style.display = "block";
         uploadMessage.textContent = "Upload successful!";
 
-        // Add uploaded file to the list
+        // Add uploaded file to the list with delete button & click-to-open
         const ul = overlay.querySelector("#documentsUL");
-        const li = document.createElement("li");
-        li.textContent = `${res.document.original_name} (${Math.round(res.document.file_size / 1024)} KB)`;
-        ul.appendChild(li);
+        addDocumentListItem(ul, res.document);
 
         // Clear file input
         fileInput.value = "";

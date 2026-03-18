@@ -12,9 +12,6 @@
     <link rel="stylesheet" href="stylesheets/style.css">
     <link rel="stylesheet" href="stylesheets/sourcePopup.css">
     <link rel="stylesheet" href="stylesheets/documentPopup.css">
-
-    <!-- Google itentity services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -36,11 +33,13 @@
                     <div class="child-header">Sources</div>
 
                     <div class="child-content" id="sourcesPanel">
-                        <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
-                        <div id="sourcesList" class="custom-list"></div>
+                        <!-- Upload Sources and Files buttons -->
+			<div class="sources-controls">
+                            <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
+			    <button class="custom-button" id="files-button" onclick="addDocuments()">↑</button>
+                        </div>
 
-                        <!-- Replace Google Drive with Document Upload -->
-                        <button class="custom-button" onclick="addDocuments()">↑</button>
+			<div id="sourcesList" class="custom-list"></div>
                     </div>
                 </div>
 
