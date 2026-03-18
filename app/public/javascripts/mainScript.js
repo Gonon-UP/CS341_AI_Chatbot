@@ -39,6 +39,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupChatPanel();
   loadSavedPages();
   setupTopicsPanel();
+  attachSourceDeleteButton();
 });
 
 /* =========================================================
@@ -147,25 +148,27 @@ async function loadSavedPages() {
     pages.forEach(page => {
       const wrapper = document.createElement("div");
       wrapper.innerHTML = buildPageCardHTML(page);
-
       const card = wrapper.firstElementChild;
 
       const titleBtn = card.querySelector(".page-title");
       const deleteBtn = card.querySelector(".delete-page");
 
-      // Open page when clicking title
       titleBtn?.addEventListener("click", () => {
         loadPage(page.page_number);
       });
 
-      // Delete page when clicking X
       deleteBtn?.addEventListener("click", async (e) => {
-        e.stopPropagation(); // Prevent accidental bubbling
+        e.stopPropagation();
         await deletePage(page.page_number);
       });
 
       panel.appendChild(card);
     });
+
+    // AUTO-LOAD TOP PAGE if no currentPageId
+    if (!currentPageId && pages.length > 0) {
+      loadPage(pages[0].page_number);
+    }
 
   } catch (err) {
     console.error("Error loading saved pages:", err);
@@ -192,7 +195,11 @@ async function loadPage(pageId) {
 
     loadSourcesFromDB(data.urls);
 
-    setupTopicsPanel(data.topics);
+    // load topics separately
+    const topicResponse = await fetch(`/page/${pageId}/topics`);
+    const topicData = await topicResponse.json();
+
+    setupTopicsPanel(topicData.topics);
 
   } catch (err) {
     console.error(err);
@@ -223,6 +230,10 @@ function loadSourcesFromDB(urls) {
 ========================================================= */
 
 function setupChatPanel() {
+  const sendBtn = document.getElementById("sendButton");
+  const textArea = document.getElementById("textBox");
+
+  if (!sendBtn || !textArea) return;
 
   sendBtn.addEventListener("click", sendMessage);
 
@@ -291,12 +302,12 @@ async function getBotReply(query) {
 }
 
 /* =========================================================
-   SOURCES PANEL
+   POPUPS
 ========================================================= */
 
 async function addSources() {
 
-  const overlay = document.getElementById("popupOverlay");
+  const overlay = document.getElementById("sourcesPopup");
 
   const response = await fetch("popups/addSources.html");
   overlay.innerHTML = await response.text();
@@ -312,107 +323,99 @@ async function addSources() {
     }
   });
 
-  resultsContainer.addEventListener("click", (e) => {
+  resultsContainer.addEventListener("click", async (e) => {
 
-    const btn = e.target.closest(".select-result-btn");
+  const btn = e.target.closest(".select-result-btn");
+  if (!btn) return;
 
-    if (btn) {
-      saveSource(
-        btn.dataset.title,
-        btn.dataset.url
-      );
-    }
-  });
+  const card = btn.closest(".result-card");
 
-  overlay.querySelector("#closeButton")
-    ?.addEventListener("click", closePopup);
-}
+  const url = card.querySelector("a")?.href;
+  const title = card.querySelector(".result-title")?.textContent;
 
-async function saveSource(preFetchedTitle = null, directUrl = null) {
-
-  const url = directUrl ||
-    document.getElementById("sourceInput").value.trim();
-
-  if (!url) return;
+  if (!url || !title || !currentPageId) return;
 
   try {
-
-    const response = await fetch("/api/save", {
+    const res = await fetch(`/api/save`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         page_number: currentPageId,
-        title: preFetchedTitle || url,
-        url
+        url,
+        title
       })
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (data.success) loadSources(currentPageId);
-
-  } catch (err) {
-    console.error("Save failed:", err);
-  }
-
-  closePopup();
-}
-
-async function loadSources(pageNumber) {
-
-  try {
-
-    const response = await fetch(`/api/urls/${pageNumber}`);
-    const data = await response.json();
-
-    const panel = document.getElementById("sourcesList");
-    panel.innerHTML = "";
-
-    data.urls.forEach(item => {
+    if (data.success) {
+      // Add to sources panel immediately
+      const panel = document.getElementById("sourcesList");
 
       const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
 
-      wrapper.innerHTML = buildSourceCardHTML(
-        item.url,
-        item.title,
-        item.url_order
-      );
-
-      const box = wrapper.firstElementChild;
-
-      box.querySelector(".remove-source")
-        ?.addEventListener("click", async () => {
-
-          await fetch(`/api/delete/${pageNumber}/${item.url_order}`, {
-            method: "DELETE"
-          });
-
-          loadSources(pageNumber);
-        });
-
-      panel.appendChild(box);
-    });
+      panel.appendChild(wrapper.firstElementChild);
+    }
 
   } catch (err) {
-    console.error("Failed to load resources:", err);
+    console.error("Error adding source:", err);
   }
+ 
+  closeSourcesPopup();
+});
+
+  overlay.querySelector("#closeButton")
+    ?.addEventListener("click", closeSourcesPopup);
 }
 
-/* =========================================================
-   POPUP UTILITIES
-========================================================= */
+function attachSourceDeleteButton() {
+  const panel = document.getElementById("sourcesList");
 
-function closePopup() {
-  const overlay = document.getElementById("popupOverlay");
+  panel.addEventListener("click", async (e) => {
+    const deleteBtn = e.target.closest(".remove-source");
+    if (!deleteBtn) return;
+
+    const card = deleteBtn.closest(".source-box");
+    const urlOrder = deleteBtn.dataset.order;
+
+    if (!urlOrder || !currentPageId) {
+      console.error("Missing urlOrder or currentPageId");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/delete/${currentPageId}/${urlOrder}`,
+        { method: "DELETE" }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        // remove from UI
+        card.remove();
+      } else {
+        console.error("Delete failed:", data.error);
+      }
+
+    } catch (err) {
+      console.error("Error deleting source:", err);
+    }
+  });
+}
+
+function closeSourcesPopup() {
+  const overlay = document.getElementById("sourcesPopup");
   overlay.style.display = "none";
   overlay.innerHTML = "";
 }
 
 async function performSearch() {
 
-  const overlay = document.getElementById("popupOverlay");
+  const overlay = document.getElementById("sourcesPopup");
   const query = overlay.querySelector("#webSearch").value.trim();
   const resultsContainer = overlay.querySelector("#searchResults");
 
@@ -440,6 +443,162 @@ async function performSearch() {
 
     resultsContainer.innerHTML = "Search failed.";
   }
+}
+
+// ---------------------------
+// DOCUMENT POPUP FUNCTIONS
+// ---------------------------
+
+// Open the document upload popup
+async function addDocuments() {
+  const pageId = currentPageId;
+  console.log("current page ID:", currentPageId);
+
+  const overlay = document.getElementById("documentsPopup");
+
+  const response = await fetch("popups/addDocuments.html");
+  overlay.innerHTML = await response.text();
+  overlay.style.display = "flex";
+
+  // Set hidden input for pageId
+  const pageInput = overlay.querySelector("#pageId");
+  if (pageInput) pageInput.value = pageId;
+
+  // Cancel button closes popup
+  overlay.querySelector("#cancelBtn")
+    ?.addEventListener("click", closeDocPopup);
+
+  // Form submission
+  const uploadForm = overlay.querySelector("#uploadForm");
+  uploadForm.onsubmit = async (e) => {
+    e.preventDefault();
+    await uploadDocument(pageId);
+  };
+
+  // Load previously uploaded documents for this page
+  const ul = overlay.querySelector("#documentsUL");
+  ul.innerHTML = ""; // clear old list
+
+  try {
+    const res = await fetch(`/getDocuments?pageId=${pageId}`);
+    const data = await res.json();
+
+    if (data.success) {
+      data.documents.forEach(doc => addDocumentListItem(ul, doc));
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// Add a document <li> to the UL with delete button and click-to-open
+function addDocumentListItem(ul, doc) {
+  const li = document.createElement("li");
+  li.className = "document-item";
+
+  // Clickable link to open document in a new tab
+  const link = document.createElement("a");
+  link.href = `/uploads/${doc.page_number || currentPageId}/${doc.file_name}`; // path to file
+  link.target = "_blank"; // open in new tab
+  link.textContent = `${doc.original_name} (${Math.round(doc.file_size / 1024)} KB)`;
+  link.className = "document-link";
+
+  // Remove button
+  const removeBtn = document.createElement("button");
+  removeBtn.textContent = "×";
+  removeBtn.className = "remove-document";
+
+  removeBtn.addEventListener("click", async (e) => {
+    e.stopPropagation(); // prevent link click
+    removeBtn.disabled = true;
+
+    try {
+      const res = await fetch(`/document/${doc.document_id}`, { method: "DELETE" });
+      const data = await res.json();
+
+      if (data.success) {
+        li.remove(); // remove from DOM
+      } else {
+        console.error("Delete failed:", data.error);
+        removeBtn.disabled = false;
+      }
+    } catch (err) {
+      console.error("Delete error:", err);
+      removeBtn.disabled = false;
+    }
+  });
+
+  li.appendChild(link);
+  li.appendChild(removeBtn);
+  ul.appendChild(li);
+}
+
+// Close the popup
+function closeDocPopup() {
+  const overlay = document.getElementById("documentsPopup");
+  overlay.style.display = "none";
+  overlay.innerHTML = "";
+};
+
+// ---------------------------
+// UPLOAD DOCUMENT FUNCTION
+// ---------------------------
+async function uploadDocument(pageId) {
+  const overlay = document.getElementById("documentsPopup");
+  const fileInput = overlay.querySelector("#documentInput");
+  if (!fileInput.files.length) return;
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append("document", file);
+  formData.append("pageId", pageId); // send the correct pageId
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
+
+  const progressContainer = overlay.querySelector("#uploadProgress");
+  const progressBar = overlay.querySelector("#progressBar");
+  const progressText = overlay.querySelector("#progressText");
+  const uploadMessage = overlay.querySelector("#uploadMessage");
+
+  progressContainer.style.display = "block";
+  progressBar.style.width = "0%";
+  progressText.textContent = "0%";
+  uploadMessage.style.display = "none";
+
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable) {
+      const percent = Math.round((event.loaded / event.total) * 100);
+      progressBar.style.width = percent + "%";
+      progressText.textContent = percent + "%";
+    }
+  };
+
+  xhr.onload = () => {
+    progressContainer.style.display = "none";
+    if (xhr.status === 200) {
+      const res = JSON.parse(xhr.responseText);
+      if (res.success) {
+        uploadMessage.style.display = "block";
+        uploadMessage.textContent = "Upload successful!";
+
+        // Add uploaded file to the list with delete button & click-to-open
+        const ul = overlay.querySelector("#documentsUL");
+        addDocumentListItem(ul, res.document);
+
+        // Clear file input
+        fileInput.value = "";
+      } else {
+        uploadMessage.style.display = "block";
+        uploadMessage.textContent = "Upload failed: " + (res.error || "Unknown error");
+      }
+    } else {
+      uploadMessage.style.display = "block";
+      uploadMessage.textContent = "Upload failed with status " + xhr.status;
+    }
+  };
+
+  xhr.send(formData);
 }
 
 /* =========================================================
@@ -487,5 +646,15 @@ async function saveTopics() {
 ========================================================= */
 
 window.addSources = addSources;
-window.saveSource = saveSource;
 window.performSearch = performSearch;
+window.closeSourcesPopup = closeSourcesPopup;
+window.closeDocPopup = closeDocPopup;
+window.addDocuments = addDocuments;
+
+export {
+  loadSourcesFromDB,
+  setupChatPanel,
+  sendMessage,
+  performSearch,
+  saveTopics
+};

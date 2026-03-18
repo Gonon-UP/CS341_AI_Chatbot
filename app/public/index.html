@@ -10,10 +10,8 @@
     <!-- Name of browser and necessary .css file -->
     <title>Research Chatbot</title>
     <link rel="stylesheet" href="stylesheets/style.css">
-    <link rel="stylesheet" href="stylesheets/popupStyle.css">
-
-    <!-- Google itentity services -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="stylesheets/sourcePopup.css">
+    <link rel="stylesheet" href="stylesheets/documentPopup.css">
 </head>
 
 <body>
@@ -35,14 +33,13 @@
                     <div class="child-header">Sources</div>
 
                     <div class="child-content" id="sourcesPanel">
-                        <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
-                        <div id="sourcesList" class="custom-list"></div>
+                        <!-- Upload Sources and Files buttons -->
+			<div class="sources-controls">
+                            <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
+			    <button class="custom-button" id="files-button" onclick="addDocuments()">↑</button>
+                        </div>
 
-                        <!-- IN ORDER TO SIGN IN: YOU NEED TO ADD TEST USERS -->
-                        <!-- BEFORE SUBMISSION TO THE CLIENT, PUBLISH WEB IN "AUDIENCE" -->
-                        <button class="custom-button" id="googleDriveLogin" >Connect Google Drive</button>
-
-                        <div class="drive-status" id="driveStatus" style="display: none;"></div>
+			<div id="sourcesList" class="custom-list"></div>
                     </div>
                 </div>
 
@@ -91,21 +88,28 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>   
 </body>
 
-<!-- JavaScript files (separate script for Google Authentication) -->
+<!-- JavaScript files (separate scripts for popups) -->
 <script type="module" src="javascripts/mainScript.js"></script>
-<script src="javascripts/authenticationScript.js"></script>
 
-<div id="popupOverlay" class="popup-overlay">
+<div id="sourcesPopup" class="popup-overlay">
     <iframe
-        id="popupFrame"
+        id="popupFrame1"
         src=""
         frameborder="0"
         style="width: 420px; height: 260px; border-radius: 16px; background: white;">
     </iframe>
 </div>
 
+<div id="documentsPopup" class="popup-overlay">
+    <iframe
+        id="popupFrame2"
+        src=""
+        frameborder="0"
+        style="width: 420px; height: 260px; border-radius: 16px; background: white;">
+    </iframe>
+</div>
 
 </html>

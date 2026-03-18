@@ -206,6 +206,37 @@ body {
   gap: 12px;
 }
 
+.sources-controls {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.sources-controls .custom-button:first-child {
+  flex: 1;
+}
+
+/* Upload files button */
+#files-button {
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#files-button:hover {
+  background-color: var(--highlight-color);
+}
+
 .source-box {
   display: flex;
   align-items: center;
@@ -275,14 +306,6 @@ body {
   background-color: #5e41a0;
 }
 
-.drive-status {
-  width: 100%;
-  cursor: pointer;
-  display: flex;
-  align-items: left;
-  justify-content: left;
-}
-
 /* Meetings panel */
 #meetingsPanel {
   display: flex;
@@ -329,10 +352,6 @@ body {
   transition: background-color 0.2s ease;
 }
 
-.page-box:hover {
-  background-color: var(--highlight-color);
-}
-
 /* Container for icon + title */
 .page-info {
   display: flex;
@@ -369,6 +388,10 @@ body {
   /* key: do not shrink below 0 and always take remaining space */
   flex: 1;
   min-width: 0;
+}
+
+.page-title:hover {
+  text-decoration: underline;
 }
 
 /* Delete button */
