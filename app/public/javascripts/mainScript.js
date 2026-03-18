@@ -39,6 +39,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupChatPanel();
   loadSavedPages();
   setupTopicsPanel();
+  attachSourceDeleteButton();
 });
 
 /* =========================================================
@@ -366,6 +367,42 @@ async function addSources() {
     ?.addEventListener("click", closeSourcesPopup);
 }
 
+function attachSourceDeleteButton() {
+  const panel = document.getElementById("sourcesList");
+
+  panel.addEventListener("click", async (e) => {
+    const deleteBtn = e.target.closest(".remove-source");
+    if (!deleteBtn) return;
+
+    const card = deleteBtn.closest(".source-box");
+    const urlOrder = deleteBtn.dataset.order;
+
+    if (!urlOrder || !currentPageId) {
+      console.error("Missing urlOrder or currentPageId");
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/delete/${currentPageId}/${urlOrder}`,
+        { method: "DELETE" }
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        // remove from UI
+        card.remove();
+      } else {
+        console.error("Delete failed:", data.error);
+      }
+
+    } catch (err) {
+      console.error("Error deleting source:", err);
+    }
+  });
+}
+
 function closeSourcesPopup() {
   const overlay = document.getElementById("sourcesPopup");
   overlay.style.display = "none";
@@ -408,7 +445,6 @@ async function performSearch() {
 // DOCUMENT POPUP FUNCTIONS
 // ---------------------------
 
-// Open the document upload popup
 // Open the document upload popup
 async function addDocuments() {
   const pageId = currentPageId;
