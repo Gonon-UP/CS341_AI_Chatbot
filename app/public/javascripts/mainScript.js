@@ -230,6 +230,10 @@ function loadSourcesFromDB(urls) {
 ========================================================= */
 
 function setupChatPanel() {
+  const sendBtn = document.getElementById("sendButton");
+  const textArea = document.getElementById("textBox");
+
+  if (!sendBtn || !textArea) return;
 
   sendBtn.addEventListener("click", sendMessage);
 
@@ -642,8 +646,15 @@ async function saveTopics() {
 ========================================================= */
 
 window.addSources = addSources;
-//window.saveSource = saveSource;
 window.performSearch = performSearch;
 window.closeSourcesPopup = closeSourcesPopup;
 window.closeDocPopup = closeDocPopup;
 window.addDocuments = addDocuments;
+
+export {
+  loadSourcesFromDB,
+  setupChatPanel,
+  sendMessage,
+  performSearch,
+  saveTopics
+};
