@@ -394,7 +394,7 @@ async function addDocuments() {
   const uploadForm = overlay.querySelector("#uploadForm");
   uploadForm.onsubmit = async (e) => {
     e.preventDefault();
-    await uploadDocument(overlay, pageId);
+    await uploadDocument(pageId);
   };
 
   // Load previously uploaded documents for this page
@@ -437,7 +437,7 @@ async function uploadDocument(pageId) {
   formData.append("pageId", pageId); // send the correct pageId
 
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", "/uploadDocument", true);
+  xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
 
   const progressContainer = overlay.querySelector("#uploadProgress");
   const progressBar = overlay.querySelector("#progressBar");

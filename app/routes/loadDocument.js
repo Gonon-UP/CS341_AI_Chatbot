@@ -11,6 +11,7 @@ const db = require("../dbms");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const pageId = req.query.pageId;
+
     if (!pageId) return cb(new Error("Missing pageId"), null);
 
     const dir = path.join(process.cwd(), "uploads", pageId);
@@ -18,7 +19,7 @@ const storage = multer.diskStorage({
     cb(null, dir);
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, Date.now() + "-" + file.originalname);
   }
 });
 
