@@ -4,7 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter # Importing 
 # not nessasary due to using llama3 for imbedding and testing -- from langchain_openai import OpenAIEmbeddings # Importing OpenAI embeddings from Langchain
 from langchain_ollama import OllamaEmbeddings, ChatOllama  #imports nessasary functions for langchain to work with llama3 model
 from langchain_core.documents import Document # Importing Document schema from Langchain
-from langchain_community.vectorstores import Chroma # Importing Chroma vector store from Langchain
+#from langchain_community.vectorstores import Chroma # Importing Chroma vector store from Langchain
 from dotenv import load_dotenv # Importing dotenv to get API key from .env file
 # No longer nessasary due to using llama3 for imbedding and testing --  from langchain_openai import ChatOpenAI # Import OpenAI LLM
 from langchain_core.prompts import ChatPromptTemplate
