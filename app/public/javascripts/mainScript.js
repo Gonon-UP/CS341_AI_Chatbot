@@ -12,6 +12,9 @@ import {
    GLOBAL STATE
 ========================================================= */
 
+/* Tracks the unique pages, necessary for accurate database
+ * storage and retrieval functions
+ */
 let currentPageId = null;
 
 /* Cached DOM Elements */
@@ -33,8 +36,8 @@ const TOPICS = [
    INITIALIZATION
 ========================================================= */
 
+/* Loads all of our necessary features when website opens */
 window.addEventListener("DOMContentLoaded", () => {
-
   setupTopBar();
   setupChatPanel();
   loadSavedPages();
@@ -48,7 +51,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function setupTopBar() {
 
-  /* Title Auto Save */
+  // title auto save
   titleArea.addEventListener("keydown", (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -56,16 +59,19 @@ function setupTopBar() {
     }
   });
 
+  // saves the title when you click off the editor
   titleArea.addEventListener("blur", autoSaveTitle);
 
-  /* New Page Button */
+  // new page button
   newPageBtn.addEventListener("click", createNewPage);
 }
 
+/* Saves the page title to database */
 async function autoSaveTitle() {
 
   if (!currentPageId) return;
 
+  // query the database
   await fetch(`/page/${currentPageId}/title`, {
     method: "POST",
     headers: {
@@ -76,12 +82,15 @@ async function autoSaveTitle() {
     })
   });
 
+  // reload the pages to reflect title update
   loadSavedPages();
 }
 
 
+/* Generates a new page for the database */
 async function createNewPage() {
 
+  // query the database
   const response = await fetch("/savePage", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -96,9 +105,10 @@ async function createNewPage() {
 
   if (!data.pageId) return;
 
+  // update current page tracker
   currentPageId = data.pageId;
 
-  /* Reset UI */
+  // Reset UI
   titleArea.value = "";
   document.getElementById("sourcesList").innerHTML = "";
   messageArea.innerHTML = "";
@@ -107,6 +117,7 @@ async function createNewPage() {
   loadPage(data.pageId);
 }
 
+/* Deletes a page */
 async function deletePage(pageId = currentPageId) {
 
   if (!pageId) return;
@@ -124,6 +135,7 @@ async function deletePage(pageId = currentPageId) {
 
   loadSavedPages();
 
+  // loads the next page in the listed pages
   if (data.nextPageId) {
     loadPage(data.nextPageId);
   } else if (pageId === currentPageId) {
@@ -137,6 +149,7 @@ async function deletePage(pageId = currentPageId) {
    Sources + Previous Meetings
 ========================================================= */
 
+/* Generates the list of database pages */
 async function loadSavedPages() {
   try {
     const response = await fetch("/pages");
@@ -145,6 +158,7 @@ async function loadSavedPages() {
     const panel = document.getElementById("pagesList");
     panel.innerHTML = "";
 
+    // creates a list of pages in Previous Meetings
     pages.forEach(page => {
       const wrapper = document.createElement("div");
       wrapper.innerHTML = buildPageCardHTML(page);
@@ -179,10 +193,10 @@ async function loadSavedPages() {
    PAGE LOADING
 ========================================================= */
 
+/* Load a page from the database */
 async function loadPage(pageId) {
 
   try {
-
     const response = await fetch(`/page/${pageId}`);
 
     if (!response.ok) throw new Error("Page not found");
@@ -206,6 +220,7 @@ async function loadPage(pageId) {
   }
 }
 
+/* Retrieve all sources from the database */
 function loadSourcesFromDB(urls) {
 
   const panel = document.getElementById("sourcesList");
@@ -229,6 +244,7 @@ function loadSourcesFromDB(urls) {
    CHATBOT PANEL
 ========================================================= */
 
+/* Creates the text area and button for interacting with chatbot */
 function setupChatPanel() {
   const sendBtn = document.getElementById("sendButton");
   const textArea = document.getElementById("textBox");
@@ -253,6 +269,7 @@ function setupChatPanel() {
   });
 }
 
+/* Sends the user or chatbot's message to the text section */
 function addMessage(text, type = "user") {
 
   const msg = document.createElement("div");
@@ -264,6 +281,10 @@ function addMessage(text, type = "user") {
   messageArea.scrollTop = messageArea.scrollHeight;
 }
 
+/* 
+ * Sends the message to the chatbot
+ * needs updated functionality for the Ollama model
+ */
 async function sendMessage() {
 
   if (!isValidMessage(textArea.value)) return;
@@ -278,7 +299,7 @@ async function sendMessage() {
   addMessage("Bot is typing...", "typing");
 
   try {
-
+    // retrieve the bot's answer to the query
     const botReply = await getBotReply(userQuery);
 
     const typingEl = messageArea.querySelector(".typing");
@@ -294,6 +315,7 @@ async function sendMessage() {
   }
 }
 
+/* Will need updating, actually queries the Ollama model */
 async function getBotReply(query) {
 
   return new Promise(resolve => {
@@ -305,14 +327,17 @@ async function getBotReply(query) {
    POPUPS
 ========================================================= */
 
+/* Adds selected source to Sources panel */
 async function addSources() {
 
   const overlay = document.getElementById("sourcesPopup");
 
+  // data from the popup (chosen website)
   const response = await fetch("popups/addSources.html");
   overlay.innerHTML = await response.text();
   overlay.style.display = "flex";
 
+  // create an HTML listed item
   const resultsContainer = overlay.querySelector("#searchResults");
   const searchInput = overlay.querySelector("#webSearch");
 
@@ -325,52 +350,55 @@ async function addSources() {
 
   resultsContainer.addEventListener("click", async (e) => {
 
-  const btn = e.target.closest(".select-result-btn");
-  if (!btn) return;
+    const btn = e.target.closest(".select-result-btn");
+    if (!btn) return;
 
-  const card = btn.closest(".result-card");
+    const card = btn.closest(".result-card");
 
-  const url = card.querySelector("a")?.href;
-  const title = card.querySelector(".result-title")?.textContent;
+    const url = card.querySelector("a")?.href;
+    const title = card.querySelector(".result-title")?.textContent;
 
-  if (!url || !title || !currentPageId) return;
+    // if any of these is missing, error
+    if (!url || !title || !currentPageId) return;
 
-  try {
-    const res = await fetch(`/api/save`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        page_number: currentPageId,
-        url,
-        title
-      })
-    });
+    try {
+      // send this source data to database
+      const res = await fetch(`/api/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          page_number: currentPageId,
+          url,
+          title
+        })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      // Add to sources panel immediately
-      const panel = document.getElementById("sourcesList");
+      if (data.success) {
+        // Add to sources panel immediately
+        const panel = document.getElementById("sourcesList");
 
-      const wrapper = document.createElement("div");
-      wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
 
-      panel.appendChild(wrapper.firstElementChild);
+        panel.appendChild(wrapper.firstElementChild);
+      }
+
+    } catch (err) {
+      console.error("Error adding source:", err);
     }
 
-  } catch (err) {
-    console.error("Error adding source:", err);
-  }
- 
-  closeSourcesPopup();
-});
+    closeSourcesPopup();
+  });
 
   overlay.querySelector("#closeButton")
     ?.addEventListener("click", closeSourcesPopup);
 }
 
+/* Give each source a delete button */
 function attachSourceDeleteButton() {
   const panel = document.getElementById("sourcesList");
 
@@ -387,6 +415,7 @@ function attachSourceDeleteButton() {
     }
 
     try {
+      // when clicked, remove from database
       const res = await fetch(
         `/api/delete/${currentPageId}/${urlOrder}`,
         { method: "DELETE" }
@@ -413,6 +442,7 @@ function closeSourcesPopup() {
   overlay.innerHTML = "";
 }
 
+// uses the Brave API key to search the web
 async function performSearch() {
 
   const overlay = document.getElementById("sourcesPopup");

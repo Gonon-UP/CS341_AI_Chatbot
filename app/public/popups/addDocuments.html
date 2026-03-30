@@ -3,9 +3,11 @@
 <div class="popup">
   <h2>Upload Document</h2>
 
+  <!-- Form to upload a document, uses the current PageID -->
   <form id="uploadForm" action="/uploadDocument" method="POST" enctype="multipart/form-data">
     <input type="hidden" id="pageId" name="pageId" value="">
 
+    <!-- Accepts a variety of file types -->
     <div class="form-group">
       <label for="documentInput">Select File:</label>
       <input
@@ -18,6 +20,7 @@
       <small>Max 50MB. Accepted: PDF, Word, Excel, PowerPoint, Text</small>
     </div>
 
+    <!-- Progress bar -->
     <div id="uploadProgress" class="progress-container" style="display: none;">
       <div class="progress-bar-bg">
         <div id="progressBar" class="progress-bar"></div>
