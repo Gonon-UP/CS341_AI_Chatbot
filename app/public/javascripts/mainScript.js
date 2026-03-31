@@ -12,7 +12,8 @@ import {
    GLOBAL STATE
 ========================================================= */
 
-/* Tracks the unique pages, necessary for accurate database
+/*
+ * Tracks the unique pages, necessary for accurate database
  * storage and retrieval functions
  */
 let currentPageId = null;
@@ -348,6 +349,7 @@ async function addSources() {
     }
   });
 
+  // add close buttons
   resultsContainer.addEventListener("click", async (e) => {
 
     const btn = e.target.closest(".select-result-btn");
@@ -442,7 +444,7 @@ function closeSourcesPopup() {
   overlay.innerHTML = "";
 }
 
-// uses the Brave API key to search the web
+/* uses the Brave API key to search the web */
 async function performSearch() {
 
   const overlay = document.getElementById("sourcesPopup");
@@ -454,7 +456,7 @@ async function performSearch() {
   resultsContainer.innerHTML = "Searching...";
 
   try {
-
+    // create an HTML container for each website for selection
     const response = await fetch(buildSearchUrl(query));
     const data = await response.json();
 
@@ -475,17 +477,17 @@ async function performSearch() {
   }
 }
 
-// ---------------------------
-// DOCUMENT POPUP FUNCTIONS
-// ---------------------------
+/* ---------------------------
+   DOCUMENT POPUP FUNCTIONS
+---------------------------- */
 
-// Open the document upload popup
+/*  Open the document upload popup */
 async function addDocuments() {
   const pageId = currentPageId;
-  console.log("current page ID:", currentPageId);
 
   const overlay = document.getElementById("documentsPopup");
 
+  // add fetched HTML for a document to the popup
   const response = await fetch("popups/addDocuments.html");
   overlay.innerHTML = await response.text();
   overlay.style.display = "flex";
@@ -521,7 +523,7 @@ async function addDocuments() {
   }
 }
 
-// Add a document <li> to the UL with delete button and click-to-open
+/* Add a document <li> to the UL with delete button and click-to-open */
 function addDocumentListItem(ul, doc) {
   const li = document.createElement("li");
   li.className = "document-item";
@@ -570,9 +572,7 @@ function closeDocPopup() {
   overlay.innerHTML = "";
 };
 
-// ---------------------------
-// UPLOAD DOCUMENT FUNCTION
-// ---------------------------
+/* Uploads documents and track its upload progress */
 async function uploadDocument(pageId) {
   const overlay = document.getElementById("documentsPopup");
   const fileInput = overlay.querySelector("#documentInput");
@@ -583,6 +583,7 @@ async function uploadDocument(pageId) {
   formData.append("document", file);
   formData.append("pageId", pageId); // send the correct pageId
 
+  // uploads a document with reference to this page's ID
   const xhr = new XMLHttpRequest();
   xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
 
@@ -591,6 +592,7 @@ async function uploadDocument(pageId) {
   const progressText = overlay.querySelector("#progressText");
   const uploadMessage = overlay.querySelector("#uploadMessage");
 
+  // progress bar when uploading
   progressContainer.style.display = "block";
   progressBar.style.width = "0%";
   progressText.textContent = "0%";
@@ -631,9 +633,9 @@ async function uploadDocument(pageId) {
   xhr.send(formData);
 }
 
-/* =========================================================
+/* ---------------------
    TOPICS PANEL
-========================================================= */
+--------------------- */
 
 function setupTopicsPanel(selectedTopics = []) {
   const panel = document.getElementById("topicsList");
@@ -645,7 +647,7 @@ function setupTopicsPanel(selectedTopics = []) {
     const card = wrapper.firstElementChild;
     const checkbox = card.querySelector(".topic-checkbox");
 
-    // Check it if it's in selectedTopics
+    // Check if in selectedTopics
     checkbox.checked = selectedTopics.includes(topic);
 
     checkbox.addEventListener("change", saveTopics);
@@ -653,6 +655,7 @@ function setupTopicsPanel(selectedTopics = []) {
   });
 }
 
+/* Uploads the selected checkboxes to the database */
 async function saveTopics() {
 
   if (!currentPageId) return;
@@ -671,9 +674,9 @@ async function saveTopics() {
   });
 }
 
-/* =========================================================
+/* ------------------------------------------
    EXPORT TO WINDOW (HTML onclick hooks)
-========================================================= */
+------------------------------------------ */
 
 window.addSources = addSources;
 window.performSearch = performSearch;
