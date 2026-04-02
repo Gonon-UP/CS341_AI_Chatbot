@@ -1,17 +1,29 @@
 // chatLogic.js
 
+/*
+ * Formats the reply from the chatbot (needs to be updated)
+ */
 export function formatBotReply(query) {
   return "This is a reply to: " + query;
 }
 
+/*
+ * Makes sure that the input text is valid
+ */
 export function isValidMessage(text) {
   return text.trim().length > 0;
 }
 
+/*
+ * Creates the string to use the search query
+ */
 export function buildSearchUrl(query) {
   return `/search?q=${encodeURIComponent(query)}`;
 }
 
+/*
+ * Generates the HTML for the search results (allows for selection)
+ */
 export function buildResultCardHTML(result) {
   return `
     <div class="result-header">
@@ -28,6 +40,9 @@ export function buildResultCardHTML(result) {
   `;
 }
 
+/*
+ * Generates the HTML for the sources after they are selected
+ */
 export function buildSourceCardHTML(url, pageTitle, urlOrder) {
   return `
     <div class="source-box">
@@ -40,6 +55,9 @@ export function buildSourceCardHTML(url, pageTitle, urlOrder) {
   `;
 }
 
+/*
+ * Generates the HTML for the listed pages
+ */
 export function buildPageCardHTML(page) {
   return `
     <div class="page-box" data-page-id="${page.page_number}">
@@ -56,6 +74,9 @@ export function buildPageCardHTML(page) {
   `;
 }
 
+/*
+ * Generates the HTML for the Topic checkboxes
+ */
 export function buildTopicCardHTML(topic, checked = false) {
   return `
     <div class="topic-box">
