@@ -1,7 +1,7 @@
 # Research Chatbot
 
 > [!IMPORTANT]
-> To access the Chatbot, click this [link](http://10.12.116.143:3000).
+> To access the Chatbot, click this [link](http://cs341aiphys:3000).
 
 Here is the chatbot's tree format:
 

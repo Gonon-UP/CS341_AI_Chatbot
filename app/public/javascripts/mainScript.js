@@ -18,13 +18,6 @@ import {
  */
 let currentPageId = null;
 
-/* Cached DOM Elements */
-const titleArea = document.getElementById("titleArea");
-const messageArea = document.getElementById("messageArea");
-const textArea = document.getElementById("textBox");
-const sendBtn = document.getElementById("sendButton");
-const newPageBtn = document.getElementById("newPageButton");
-
 /* TOPICS */
 const TOPICS = [
   "Theology",
@@ -51,6 +44,8 @@ window.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 
 function setupTopBar() {
+  const titleArea = getTitleArea();
+  const newPageBtn = getNewPageBtn();
 
   // title auto save
   titleArea.addEventListener("keydown", (e) => {
@@ -72,6 +67,8 @@ async function autoSaveTitle() {
 
   if (!currentPageId) return;
 
+  const titleArea = getTitleArea();
+
   // query the database
   await fetch(`/page/${currentPageId}/title`, {
     method: "POST",
@@ -90,6 +87,8 @@ async function autoSaveTitle() {
 
 /* Generates a new page for the database */
 async function createNewPage() {
+  const titleArea = getTitleArea();
+  const messageArea = getMessageArea();
 
   // query the database
   const response = await fetch("/savePage", {
@@ -120,6 +119,7 @@ async function createNewPage() {
 
 /* Deletes a page */
 async function deletePage(pageId = currentPageId) {
+  const titleArea = getTitleArea();
 
   if (!pageId) return;
   if (!confirm("Delete this page?")) return;
@@ -196,6 +196,7 @@ async function loadSavedPages() {
 
 /* Load a page from the database */
 async function loadPage(pageId) {
+  const titleArea = getTitleArea();
 
   try {
     const response = await fetch(`/page/${pageId}`);
@@ -272,7 +273,7 @@ function setupChatPanel() {
 
 /* Sends the user or chatbot's message to the text section */
 function addMessage(text, type = "user") {
-
+  const messageArea = getMessageArea();
   const msg = document.createElement("div");
 
   msg.className = `message ${type}`;
@@ -287,6 +288,9 @@ function addMessage(text, type = "user") {
  * needs updated functionality for the Ollama model
  */
 async function sendMessage() {
+  const textArea = getTextArea();
+  const sendBtn = getSendBtn();
+  const messageArea = getMessageArea();
 
   if (!isValidMessage(textArea.value)) return;
 
@@ -675,6 +679,34 @@ async function saveTopics() {
 }
 
 /* ------------------------------------------
+   Getters/setters
+------------------------------------------ */
+
+function setCurrentPageId(id) {
+  currentPageId = id;
+}
+
+function getTextArea() {
+  return document.getElementById("textBox");
+}
+
+function getMessageArea() {
+  return document.getElementById("messageArea");
+}
+
+function getTitleArea() {
+  return document.getElementById("titleArea");
+}
+
+function getSendBtn() {
+  return document.getElementById("sendButton");
+}
+
+function getNewPageBtn() {
+  return document.getElementById("newPageButton");
+}
+
+/* ------------------------------------------
    EXPORT TO WINDOW (HTML onclick hooks)
 ------------------------------------------ */
 
@@ -689,5 +721,6 @@ export {
   setupChatPanel,
   sendMessage,
   performSearch,
-  saveTopics
+  saveTopics,
+  setCurrentPageId
 };
