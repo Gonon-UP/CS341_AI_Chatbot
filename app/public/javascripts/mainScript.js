@@ -722,5 +722,13 @@ export {
   sendMessage,
   performSearch,
   saveTopics,
-  setCurrentPageId
+  setCurrentPageId,
+  loadSavedPages,
+  createNewPage,
+  autoSaveTitle,
+  setupTopBar,
+  setupTopicsPanel,
+  attachSourceDeleteButton,
+  loadPage,
+  deletePage
 };
