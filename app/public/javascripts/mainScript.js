@@ -730,5 +730,8 @@ export {
   setupTopicsPanel,
   attachSourceDeleteButton,
   loadPage,
-  deletePage
+  deletePage,
+  addDocuments,
+  addDocumentListItem,
+  currentPageId
 };
