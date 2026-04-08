@@ -346,10 +346,21 @@ async function addSources() {
   const resultsContainer = overlay.querySelector("#searchResults");
   const searchInput = overlay.querySelector("#webSearch");
 
-  searchInput.addEventListener("keydown", (e) => {
+  searchInput.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      performSearch();
+
+      const inputVal = searchInput.value.trim();
+
+      if (!inputVal) return;
+
+      // Check if the input looks like a URL
+      try {
+        new URL(inputVal);
+        await addURLDirectly(inputVal);
+      } catch {
+        performSearch();
+      }
     }
   });
 
@@ -402,6 +413,47 @@ async function addSources() {
 
   overlay.querySelector("#closeButton")
     ?.addEventListener("click", closeSourcesPopup);
+}
+
+async function addURLDirectly(url) {
+  if (!currentPageId) return;
+
+  try {
+    // Fetch the page title from the URL
+    let title = url; // fallback if fetch fails
+
+    try {
+      const res = await fetch(`/api/getTitle?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.title) title = data.title;
+    } catch (err) {
+      console.warn("Could not fetch title for URL, using URL itself");
+    }
+
+    // Save to DB
+    const res = await fetch(`/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        page_number: currentPageId,
+        url,
+        title
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const panel = document.getElementById("sourcesList");
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
+      panel.appendChild(wrapper.firstElementChild);
+    }
+  } catch (err) {
+    console.error("Error adding URL directly:", err);
+  }
+
+  closeSourcesPopup();
 }
 
 /* Give each source a delete button */
