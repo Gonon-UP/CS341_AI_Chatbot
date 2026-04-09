@@ -785,5 +785,6 @@ export {
   deletePage,
   addDocuments,
   addDocumentListItem,
-  currentPageId
+  currentPageId,
+  addSources
 };

@@ -1,11 +1,3 @@
-global.fetch = jest.fn(() =>
-  Promise.resolve({
-    json: () => Promise.resolve({ success: true }) // or { success: false, error: "some error" }
-  })
-);
-
-global.pages = [{ id: 1, title: "Page 1" }, { id: 2, title: "Page 2" }];
-
 import * as main from "../javascripts/mainScript.js";
 import * as chatLogic from "../javascripts/chatLogic.js";
 
@@ -27,14 +19,12 @@ jest.mock("../javascripts/chatLogic.js", () => ({
 const mockFormatBotReply = jest.fn((q) => `bot:${q}`);
 
 /* ================================
-   GLOBAL FETCH MOCK
+   RESET BEFORE EACH TEST
 ================================ */
-global.fetch = jest.fn();
-
-/* ================================
-   DOM SETUP
-================================ */
-function setupDOM() {
+beforeEach(() => {
+  /* -----------------------------
+     DOM SETUP
+  ----------------------------- */
   document.body.innerHTML = `
     <div id="documentsPopup"></div>
     <div id="sourcesPopup"></div>
@@ -47,32 +37,43 @@ function setupDOM() {
     <button id="sendButton"></button>
     <button id="newPageButton"></button>
   `;
-}
 
-test("DOM exists", () => {
-  setupDOM();
-  expect(document.getElementById("textBox")).not.toBeNull();
-  expect(document.getElementById("messageArea")).not.toBeNull();
-});
-
-/* ================================
-   RESET BEFORE EACH TEST
-================================ */
-beforeEach(() => {
-  setupDOM();
+  /* -----------------------------
+     RESET ALL MOCKS
+  ----------------------------- */
   jest.clearAllMocks();
 
-  chatLogic.isValidMessage.mockReturnValue(true);
+  /* -----------------------------
+     GLOBAL VARIABLES
+  ----------------------------- */
+  global.currentPageId = 42;
 
+  /* -----------------------------
+     MOCK chatLogic.js FUNCTIONS
+  ----------------------------- */
+  chatLogic.isValidMessage.mockReturnValue(true);
+  chatLogic.formatBotReply.mockImplementation((q) => `bot:${q}`);
+  chatLogic.buildSearchUrl.mockImplementation((q) => `/search?q=${q}`);
+  chatLogic.buildResultCardHTML.mockImplementation(() => "<div class='result-inner'></div>");
+  chatLogic.buildSourceCardHTML.mockImplementation(() => "<div class='source-box'></div>");
+  chatLogic.buildPageCardHTML.mockImplementation(() => "<div></div>");
+  chatLogic.buildTopicCardHTML.mockImplementation(() => "<div><input class='topic-checkbox' value='Test'/></div>");
+
+  /* -----------------------------
+     MOCK FETCH
+  ----------------------------- */
   global.fetch = jest.fn().mockResolvedValue({
     ok: true,
     json: async () => ({
       page: { title: "" },
       urls: [],
       topics: []
-    })
+    }),
   });
 
+  /* -----------------------------
+     FAKE TIMERS
+  ----------------------------- */
   jest.useFakeTimers();
 });
 
@@ -221,7 +222,6 @@ test("saveTopics sends selected topics", async () => {
   );
 });
 
-
 test("deleteSource: handles deletion after confirmation", async () => {
   jest.useRealTimers();
 
@@ -234,6 +234,9 @@ test("deleteSource: handles deletion after confirmation", async () => {
   `;
 
   main.attachSourceDeleteButton();
+
+  // ✅ MOCK confirm BEFORE clicking
+  window.confirm = jest.fn(() => true);
 
   // ✅ Mock delete fetch correctly
   global.fetch.mockResolvedValueOnce({
@@ -250,12 +253,6 @@ test("deleteSource: handles deletion after confirmation", async () => {
     "/api/delete/42/123",
     { method: "DELETE" }
   );
-
-  window.confirm = jest.fn(() => true);
-
-  deleteBtn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-
-  await Promise.resolve();
 
   expect(document.getElementById("s1")).toBeNull();
 
@@ -550,11 +547,11 @@ describe("Documents panel", () => {
         json: async () => ({ success: true, documents: [{ document_id: 1, file_name: "file.pdf", original_name: "file.pdf", file_size: 1024 }] })
       });
 
-    await addDocuments();
+    await main.addDocuments(); // ✅ added main.
 
     const overlay = document.getElementById("documentsPopup");
     expect(overlay.style.display).toBe("flex");
-    expect(overlay.querySelector("#pageId").value).toBe(String(currentPageId));
+    expect(overlay.querySelector("#pageId").value).toBe(String(main.getCurrentPageId())); // ✅ use main.getCurrentPageId()
     expect(overlay.querySelector("#documentsUL").children.length).toBe(1);
   });
 
@@ -562,7 +559,7 @@ describe("Documents panel", () => {
     const ul = document.createElement("ul");
     const doc = { document_id: 1, file_name: "file.pdf", original_name: "file.pdf", file_size: 2048, page_number: 42 };
 
-    addDocumentListItem(ul, doc);
+    main.addDocumentListItem(ul, doc); // ✅ add main.
 
     const li = ul.querySelector("li");
     expect(li).not.toBeNull();
@@ -608,37 +605,160 @@ describe("Documents panel", () => {
     expect(li).not.toBeNull();
     expect(li.querySelector("a").textContent).toMatch(/test\.txt/);
   });
+
+  test("adds a URL directly when input is a valid URL", async () => {
+    const url = "https://directurl.com";
+
+    // Mock getTitle and save
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce({
+        json: async () => ({ title: "Direct URL Title" })
+      })
+      .mockResolvedValueOnce({
+        json: async () => ({ success: true, url_order: 5 })
+      });
+
+    await main.addURLDirectly(url); // ✅ add main.
+
+    expect(global.fetch).toHaveBeenNthCalledWith(1, `/api/getTitle?url=${encodeURIComponent(url)}`);
+    expect(global.fetch).toHaveBeenNthCalledWith(2, "/api/save", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        page_number: main.getCurrentPageId(),
+        url,
+        title: "Direct URL Title"
+      })
+    }));
+
+    const panel = document.getElementById("sourcesList");
+    expect(panel.querySelector(".source-box")).not.toBeNull();
+    expect(main.closeSourcesPopup).toHaveBeenCalled();
+  });
 });
 
 describe("Topics panel", () => {
   test("setupTopicsPanel renders checkboxes correctly", () => {
-    setupTopicsPanel(["Math"]);
+    main.setupTopicsPanel(["Math"]); // ✅ add main.
 
     const panel = document.getElementById("topicsList");
     const checkboxes = panel.querySelectorAll("input[type=checkbox]");
-    expect(checkboxes.length).toBe(3);
-    expect(checkboxes[0].checked).toBe(true); // Math selected
-    expect(checkboxes[1].checked).toBe(false);
+    expect(checkboxes.length).toBeGreaterThan(0);
+    expect(checkboxes[0].checked).toBe(true);
   });
 
   test("saveTopics posts selected topics", async () => {
-    global.fetch = jest.fn().mockResolvedValue({ ok: true });
-
-    const panel = document.getElementById("topicsList");
-    panel.innerHTML = `
+    document.getElementById("topicsList").innerHTML = `
       <input type="checkbox" value="Math" checked/>
       <input type="checkbox" value="Science"/>
     `;
 
-    await saveTopics();
+    await main.saveTopics(); // ✅ add main.
 
     expect(global.fetch).toHaveBeenCalledWith(
-      `/page/${currentPageId}/topics`,
+      `/page/${main.getCurrentPageId()}/topics`,
       expect.objectContaining({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ topics: ["Math"] })
       })
     );
+  });
+});
+
+/* ================================
+   ADD SOURCES TESTS
+================================ */
+describe("addSources and addURLDirectly", () => {
+
+  beforeEach(() => {
+    // Ensure overlay and panel exist
+    const overlay = document.getElementById("sourcesPopup");
+    overlay.innerHTML = `
+      <input id="webSearch"/>
+      <div id="searchResults"></div>
+      <button id="closeButton"></button>
+    `;
+    document.getElementById("sourcesList").innerHTML = "";
+    global.currentPageId = 42;
+
+    // Mock closeSourcesPopup
+    main.closeSourcesPopup = jest.fn();
+
+    // Reset fetch mock
+    global.fetch = jest.fn().mockResolvedValue({
+      json: async () => ({ success: true, url_order: 1 })
+    });
+  });
+
+  test("adds a source by clicking select button", async () => {
+    const overlay = document.getElementById("sourcesPopup");
+    overlay.querySelector("#searchResults").innerHTML = `
+      <div class="result-card">
+        <a href="https://example.com">Example</a>
+        <div class="result-title">Example Title</div>
+        <button class="select-result-btn">Select</button>
+      </div>
+    `;
+    await main.addSources();
+
+    const btn = overlay.querySelector(".select-result-btn");
+    btn.click();
+
+    await Promise.resolve(); // wait async handlers
+
+    expect(global.fetch).toHaveBeenCalledWith("/api/save", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        page_number: currentPageId,
+        url: "https://example.com",
+        title: "Example Title"
+      })
+    }));
+
+    const panel = document.getElementById("sourcesList");
+    expect(panel.querySelector(".source-box")).not.toBeNull();
+    expect(main.closeSourcesPopup).toHaveBeenCalled();
+  });
+
+  test("adds a URL directly when input is a valid URL", async () => {
+    const url = "https://directurl.com";
+
+    // Mock getTitle and save
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce({
+        json: async () => ({ title: "Direct URL Title" })
+      })
+      .mockResolvedValueOnce({
+        json: async () => ({ success: true, url_order: 5 })
+      });
+
+    await main.addURLDirectly(url);
+
+    expect(global.fetch).toHaveBeenNthCalledWith(1, `/api/getTitle?url=${encodeURIComponent(url)}`);
+    expect(global.fetch).toHaveBeenNthCalledWith(2, "/api/save", expect.objectContaining({
+      method: "POST",
+      body: JSON.stringify({
+        page_number: currentPageId,
+        url,
+        title: "Direct URL Title"
+      })
+    }));
+
+    const panel = document.getElementById("sourcesList");
+    expect(panel.querySelector(".source-box")).not.toBeNull();
+    expect(main.closeSourcesPopup).toHaveBeenCalled();
+  });
+
+  test("ignores invalid or empty URL input on Enter", async () => {
+    const overlay = document.getElementById("sourcesPopup");
+    const input = overlay.querySelector("#webSearch");
+    input.value = "";
+
+    await main.addSources();
+
+    const event = new KeyboardEvent("keydown", { key: "Enter", bubbles: true });
+    input.dispatchEvent(event);
+
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

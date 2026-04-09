@@ -1,7 +1,7 @@
 # Research Chatbot
 
 > [!IMPORTANT]
-> To access the Chatbot, click this [link](http://cs341aiphys:3000).
+> To access the Chatbot on Virtual Machine or on Staff WIFI, click this [link](http://cs341aiphys:3000).
 
 Here is the chatbot's tree format:
 
@@ -117,3 +117,15 @@ Below this panel is the `Previous Meetings` section where you can click through 
 On the right size of the page, the `Topics` section is where you may select the Chatbot's specific field of expertise. This switches between the LLM models, allowing for a broader range of highly specific information and analysis.
 
 The `Upcoming Tasks` section is a user tool that is meant to keep track of upcoming tasks and deadlines. This is an extra feature and does not impact the Chatbot's responses.
+
+# Jest Code Coverage (as of Sprint 4)
+File           | % Stmts | % Branch | % Funcs | % Lines
+---------------|---------|----------|---------|---------
+All files      |   62.17 |    38.94 |   78.57 |   64.17
+ chatLogic.js  |     100 |       60 |     100 |     100
+ mainScript.js |   61.37 |    37.77 |   75.51 |   63.37
+
+# Resolved Bugs
+[BUG #1](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/16): Adding a URL directly to the Sources list.
+
+[BUG #2](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/13): Accessing README.txt resulting in 'error: not found'.
