@@ -323,7 +323,7 @@ async function sendMessage() {
 /* Will need updating, actually queries the Ollama model */
 async function getBotReply(query) {
   // LAN IP address the virtual machine, hosting the ollama
-  const ollamaUrl = 'http://10.12.18.250:11434/api/generate';
+  const ollamaUrl = 'http://10.12.18.250:11434/api/generate'; //
 
   try {
     const response = await fetch(ollamaUrl, {
