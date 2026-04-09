@@ -1,1 +1,9 @@
 node_modules/
+
+
+# Ignore virtual environment
+venv/
+rag_ollama/raglogic/lib/
+rag_ollama/raglogic/bin/
+rag_ollama/raglogic/include/
+rag_ollama/raglogic/share/
