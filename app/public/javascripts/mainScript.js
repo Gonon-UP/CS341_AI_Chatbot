@@ -18,13 +18,6 @@ import {
  */
 let currentPageId = null;
 
-/* Cached DOM Elements */
-const titleArea = document.getElementById("titleArea");
-const messageArea = document.getElementById("messageArea");
-const textArea = document.getElementById("textBox");
-const sendBtn = document.getElementById("sendButton");
-const newPageBtn = document.getElementById("newPageButton");
-
 /* TOPICS */
 const TOPICS = [
   "Theology",
@@ -51,6 +44,8 @@ window.addEventListener("DOMContentLoaded", () => {
 ========================================================= */
 
 function setupTopBar() {
+  const titleArea = getTitleArea();
+  const newPageBtn = getNewPageBtn();
 
   // title auto save
   titleArea.addEventListener("keydown", (e) => {
@@ -72,6 +67,8 @@ async function autoSaveTitle() {
 
   if (!currentPageId) return;
 
+  const titleArea = getTitleArea();
+
   // query the database
   await fetch(`/page/${currentPageId}/title`, {
     method: "POST",
@@ -90,6 +87,8 @@ async function autoSaveTitle() {
 
 /* Generates a new page for the database */
 async function createNewPage() {
+  const titleArea = getTitleArea();
+  const messageArea = getMessageArea();
 
   // query the database
   const response = await fetch("/savePage", {
@@ -120,6 +119,7 @@ async function createNewPage() {
 
 /* Deletes a page */
 async function deletePage(pageId = currentPageId) {
+  const titleArea = getTitleArea();
 
   if (!pageId) return;
   if (!confirm("Delete this page?")) return;
@@ -196,6 +196,7 @@ async function loadSavedPages() {
 
 /* Load a page from the database */
 async function loadPage(pageId) {
+  const titleArea = getTitleArea();
 
   try {
     const response = await fetch(`/page/${pageId}`);
@@ -272,7 +273,7 @@ function setupChatPanel() {
 
 /* Sends the user or chatbot's message to the text section */
 function addMessage(text, type = "user") {
-
+  const messageArea = getMessageArea();
   const msg = document.createElement("div");
 
   msg.className = `message ${type}`;
@@ -287,6 +288,9 @@ function addMessage(text, type = "user") {
  * needs updated functionality for the Ollama model
  */
 async function sendMessage() {
+  const textArea = getTextArea();
+  const sendBtn = getSendBtn();
+  const messageArea = getMessageArea();
 
   if (!isValidMessage(textArea.value)) return;
 
@@ -342,10 +346,21 @@ async function addSources() {
   const resultsContainer = overlay.querySelector("#searchResults");
   const searchInput = overlay.querySelector("#webSearch");
 
-  searchInput.addEventListener("keydown", (e) => {
+  searchInput.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      performSearch();
+
+      const inputVal = searchInput.value.trim();
+
+      if (!inputVal) return;
+
+      // Check if the input looks like a URL
+      try {
+        new URL(inputVal);
+        await addURLDirectly(inputVal);
+      } catch {
+        performSearch();
+      }
     }
   });
 
@@ -398,6 +413,47 @@ async function addSources() {
 
   overlay.querySelector("#closeButton")
     ?.addEventListener("click", closeSourcesPopup);
+}
+
+async function addURLDirectly(url) {
+  if (!currentPageId) return;
+
+  try {
+    // Fetch the page title from the URL
+    let title = url; // fallback if fetch fails
+
+    try {
+      const res = await fetch(`/api/getTitle?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.title) title = data.title;
+    } catch (err) {
+      console.warn("Could not fetch title for URL, using URL itself");
+    }
+
+    // Save to DB
+    const res = await fetch(`/api/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        page_number: currentPageId,
+        url,
+        title
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      const panel = document.getElementById("sourcesList");
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = buildSourceCardHTML(url, title, data.url_order);
+      panel.appendChild(wrapper.firstElementChild);
+    }
+  } catch (err) {
+    console.error("Error adding URL directly:", err);
+  }
+
+  closeSourcesPopup();
 }
 
 /* Give each source a delete button */
@@ -675,6 +731,34 @@ async function saveTopics() {
 }
 
 /* ------------------------------------------
+   Getters/setters
+------------------------------------------ */
+
+function setCurrentPageId(id) {
+  currentPageId = id;
+}
+
+function getTextArea() {
+  return document.getElementById("textBox");
+}
+
+function getMessageArea() {
+  return document.getElementById("messageArea");
+}
+
+function getTitleArea() {
+  return document.getElementById("titleArea");
+}
+
+function getSendBtn() {
+  return document.getElementById("sendButton");
+}
+
+function getNewPageBtn() {
+  return document.getElementById("newPageButton");
+}
+
+/* ------------------------------------------
    EXPORT TO WINDOW (HTML onclick hooks)
 ------------------------------------------ */
 
@@ -689,5 +773,18 @@ export {
   setupChatPanel,
   sendMessage,
   performSearch,
-  saveTopics
+  saveTopics,
+  setCurrentPageId,
+  loadSavedPages,
+  createNewPage,
+  autoSaveTitle,
+  setupTopBar,
+  setupTopicsPanel,
+  attachSourceDeleteButton,
+  loadPage,
+  deletePage,
+  addDocuments,
+  addDocumentListItem,
+  currentPageId,
+  addSources
 };
