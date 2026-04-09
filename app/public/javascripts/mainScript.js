@@ -296,7 +296,7 @@ async function sendMessage() {
 
 async function getBotReply(query) {
   // LAN IP address the virtual machine, hosting the ollama
-  const ollamaUrl = 'http://10.12.116.143:11434/api/generate';
+  const ollamaUrl = 'http://10.12.18.250:11434/api/generate';
 
   try {
     const response = await fetch(ollamaUrl, {
@@ -305,7 +305,7 @@ async function getBotReply(query) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3:lastest', // Just a model we have in the VM
+        model: 'llama3-chatqa:latest', // Just a model we have in the VM
         prompt: query,
         stream: false    // Keeps it simple by waiting for the full response instead of streaming chunks
       })
