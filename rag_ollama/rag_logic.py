@@ -9,11 +9,16 @@ from dotenv import load_dotenv # Importing dotenv to get API key from .env file
 # No longer nessasary due to using llama3 for imbedding and testing --  from langchain_openai import ChatOpenAI # Import OpenAI LLM
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_chroma import Chroma
+from langchain_community.document_loaders import UnstructuredURLLoader
 import os # Importing os module for operating system functionalities
 import shutil # Importing shutil module for high-level file operations
 
+# ragserver is started via uvicorn server:bridge --host 0.0.0.0 --port 8000 (0.0.0.0 means to listen on all networks) (8000 is ocmmonly used for any python dev but a different port
+# should be picked to work with our port exceptions)
+# to modify the front end to use the rag, change the ollamaURL const to equal 'http://10.12.116.143:8000/api/generate'
 
 # PDF file directory (where client pdfs will be located)
+# website upload path is r"../app/uploads/1"
 DATA_PATH = r"data"
 def load_documents():
     """
@@ -160,23 +165,29 @@ def query_rag(query_text):
   # Here we initialize the Ollama chat model (not the imbedding version)
   # this is not the embedding model, this should be the main ollama model from the webpage
   # for now it is the same model that does the embedding
-  model = ChatOllama(model="llama3", temperature=0)
+  model = ChatOllama(model="llama3-chatqa", temperature=0)
   # note, temperature determines how flambouyant and creative llama3 will be
   # zero will be very deterministic
 
   # this variable will generate response text based on the previos given prompt
-  response_text = model.invoke(prompt)
- 
+  response = model.invoke(prompt)
+  response_text = response.content
   # here we get the sources of the matching documents
   sources = [doc.metadata.get("source", None) for doc, _score in results]
  
   # Format and return response which includes generated text and sources
-  formatted_response = f"Response: {response_text}\nSources: {sources}"
-  return formatted_response, response_text
+  # formatted_response = f"Response: {response_text}\nSources: {sources}"
+  #return formatted_response, response_text
+
+  return {
+          "response" : response_text,
+          "sources" : sources
+          }
+
 
 # query_rag function call to have the llama3 model run and anylize the documents
 formatted_response, response_text = query_rag(query_text)
 
 
 # print statment to display the models response to the data
-print(response_text.content)
+print(response_text)
