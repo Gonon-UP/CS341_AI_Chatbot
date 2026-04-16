@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const session = require('express-session');
 require("dotenv").config();
 
 var searchWebRouter = require('./routes/searchWeb');
@@ -23,6 +24,14 @@ var deleteDocumentRouter = require('./routes/deleteDocument');
 
 var app = express();
 
+// Session middleware MUST be after app = express()
+app.use(session({
+  secret: process.env.SESSION_KEY,
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }
+}));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -33,6 +42,53 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Login routes
+app.get('/', (req, res) => {
+  // Check if user has a valid session
+  if (req.session && req.session.user) {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } else {
+    // Not logged in, redirect to login
+    res.redirect('/login');
+  }
+});
+
+app.get('/login', (req, res) => {
+  // If already logged in, send to index instead
+  if (req.session && req.session.user) {
+    res.redirect('/');
+  } else {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+  }
+});
+
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  if (username && password) {
+    // Store user in session
+    req.session.user = username;
+    // Save session before responding
+    req.session.save((err) => {
+      if (err) {
+        return res.json({ success: false, error: 'Session error' });
+      }
+      res.json({ success: true });
+    });
+  } else {
+    res.json({ success: false, error: 'Invalid credentials' });
+  }
+});
+
+app.get('/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.json({ success: false, error: 'Logout failed' });
+    }
+    res.redirect('/login');
+  });
+});
 
 app.use('/', searchWebRouter);
 app.use('/users', usersRouter);
