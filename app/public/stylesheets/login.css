@@ -1,132 +1,154 @@
-/* Prevent overflow from padding/width */
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-}
+/* This file styles the "auth-page/auth-shell/panel" login layout */
 
 .auth-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+
+  /* IMPORTANT: no background here so it matches index.html */
   padding: 24px;
+  box-sizing: border-box;
 }
 
 .auth-shell {
-  width: min(980px, 100%);
-  display: grid;
-  grid-template-columns: 1fr; /* login only */
-  gap: 18px;
-}
-
-/* When create panel is shown, switch to 2 columns */
-.auth-shell.show-create {
-  grid-template-columns: 1.1fr 0.9fr;
-}
-
-@media (max-width: 900px) {
-  .auth-shell.show-create { grid-template-columns: 1fr; }
+  width: 100%;
+  max-width: 520px;
 }
 
 .panel {
-  background: rgba(255,255,255,0.9);
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
-  backdrop-filter: blur(6px);
-  max-width: 100%;
-  overflow: hidden;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  padding: 22px;
+  box-sizing: border-box;
 }
 
 .panel-header {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 12px;
+  text-align: center;
+  margin-bottom: 10px;
 }
 
 .muted {
-  opacity: 0.8;
-  font-size: 14px;
-  line-height: 1.35;
+  color: #666;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 10px 0;
-  max-width: 100%;
+  margin-bottom: 14px;
 }
 
 .label {
-  font-size: 13px;
-  opacity: 0.85;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  color: #333;
 }
 
 .input {
   width: 100%;
-  max-width: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  padding: 10px 12px;
+  padding: 11px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
   font-size: 14px;
+}
+
+.input:focus {
+  border-color: #007BFF;
   outline: none;
-  background: rgba(255,255,255,0.95);
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
 }
 
 .row-actions {
   display: flex;
   gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
   margin-top: 10px;
-  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.custom-button,
+.secondary-button {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.custom-button {
+  background-color: var(--element-color);
+  color: white;
+  flex: 1;
+  min-width: 160px;
+}
+
+.custom-button:hover {
+  background-color: var(--highlight-color);
 }
 
 .secondary-button {
-  border-radius: 12px;
-  padding: 10px 12px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.9);
-  cursor: pointer;
-  font-weight: 600;
-  max-width: 100%;
+  background: transparent;
+  color: #007BFF;
+  text-decoration: underline;
+  flex: 1;
+  min-width: 160px;
+}
+
+.secondary-button:hover {
+  color: #0056b3;
 }
 
 .status {
   margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 12px;
+  text-align: center;
   font-size: 14px;
-  display: none;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.85);
-  max-width: 100%;
-  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
-.status.show { display: block; }
-.status.error { border-color: rgba(255,0,0,0.25); }
-.status.ok { border-color: rgba(0,140,0,0.25); }
 
+/* Step chips */
 .steps {
   display: flex;
   gap: 8px;
+  justify-content: center;
+  margin: 12px 0 16px;
   flex-wrap: wrap;
-  margin: 10px 0 0;
 }
 
 .chip {
+  font-size: 12px;
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(0,0,0,0.12);
-  background: rgba(255,255,255,0.8);
-  font-size: 12px;
-  opacity: 0.85;
+  background: #eee;
+  color: #555;
+  user-select: none;
 }
+
 .chip.active {
-  font-weight: 700;
-  opacity: 1;
-  border-color: rgba(0,0,0,0.25);
+  background: rgba(0, 123, 255, 0.14);
+  color: #0b58b0;
+  border: 1px solid rgba(0, 123, 255, 0.35);
+}
+
+/* Mobile tweaks */
+@media (max-width: 420px) {
+  .panel { padding: 18px; }
+  .custom-button, .secondary-button { min-width: 100%; }
+}
+
+/* Grey button variant (still uses secondary-button in HTML) */
+.secondary-button--ghost {
+  background: #e9ecef;
+  color: #333;
+  text-decoration: none;
+  border: 1px solid #d0d7de;
+}
+
+.secondary-button--ghost:hover {
+  background: #dde2e6;
+  color: #111;
 }

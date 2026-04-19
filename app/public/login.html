@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Research Chatbot - Login</title>
 
-  <link rel="stylesheet" href="stylesheets/style.css">
-  <link rel="stylesheet" href="stylesheets/sourcePopup.css">
-  <link rel="stylesheet" href="stylesheets/documentPopup.css">
-  <link rel="stylesheet" href="stylesheets/login.css">
+  <!-- IMPORTANT: make these root-relative so they load from /login too -->
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="/stylesheets/sourcePopup.css">
+  <link rel="stylesheet" href="/stylesheets/documentPopup.css">
+  <link rel="stylesheet" href="/stylesheets/login.css">
 </head>
 
 <body>
@@ -33,7 +34,12 @@
 
         <div class="row-actions">
           <button class="custom-button" id="loginBtn">Sign In</button>
-          <button class="secondary-button" id="goToCreateBtn" type="button">Create account</button>
+	  <button class="secondary-button secondary-button--ghost" id="goToCreateBtn" type="button">Create account</button>
+        </div>
+
+        <!-- NEW: password manager / reset link -->
+        <div class="row-actions">
+          <button class="secondary-button" id="goToResetBtn" type="button">Forgot password?</button>
         </div>
 
         <div class="status" id="loginStatus"></div>
@@ -90,9 +96,63 @@
 
         <div class="status" id="signupStatus"></div>
       </div>
+
+      <!-- NEW: Reset Password panel (hidden by default) -->
+      <div class="panel" id="resetPanel" style="display:none;">
+        <div class="panel-header">Reset password</div>
+        <div class="muted">
+          Step 1: enter your <strong>@up.edu</strong> email to receive a reset code.
+        </div>
+
+        <div class="steps">
+          <div class="chip active" id="resetChip1">1) Email</div>
+          <div class="chip" id="resetChip2">2) Code</div>
+          <div class="chip" id="resetChip3">3) Password</div>
+        </div>
+
+        <div id="resetStep1">
+          <div class="field">
+            <div class="label">UP Email</div>
+            <input class="input" id="resetEmail" placeholder="yourname@up.edu" autocomplete="email" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="sendResetCodeBtn">Send reset code</button>
+            <button class="secondary-button" id="backToSignInFromReset1" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div id="resetStep2" style="display:none;">
+          <div class="muted">Step 2: check your email and enter the 6-digit reset code.</div>
+          <div class="field">
+            <div class="label">Reset code</div>
+            <input class="input" id="resetCode" placeholder="123456" inputmode="numeric" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="goToResetPasswordStepBtn">Continue</button>
+            <button class="secondary-button" id="resendResetBtn" type="button">Resend</button>
+            <button class="secondary-button" id="backToSignInFromReset2" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div id="resetStep3" style="display:none;">
+          <div class="muted">Step 3: set a new password (8+ characters).</div>
+          <div class="field">
+            <div class="label">New password</div>
+            <input class="input" id="resetNewPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="confirmResetBtn">Change password</button>
+            <button class="secondary-button" id="backToSignInFromReset3" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div class="status" id="resetStatus"></div>
+      </div>
+
     </div>
   </div>
 
-  <script src="javascripts/login.js"></script>
+  <!-- IMPORTANT: root-relative -->
+  <script src="/javascripts/login.js"></script>
 </body>
 </html>
