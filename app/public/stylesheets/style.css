@@ -6,6 +6,7 @@
   --highlight-color: #3d2b5d;
   --title-color: #ffffff;
   --element-title-color: #d4d4d4;
+  --chat-input-height: 52px;
 }
 
 body {
@@ -135,6 +136,7 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-right: 10px;
+  gap: 10px; /* spacing between New Page + Sign Out */
 } 
 
 .title {
@@ -164,10 +166,16 @@ body {
   outline: none;
 }
 
-#newPageButton {
-  width: auto;
-  display: inline-block;
-  padding: 6px 14px;
+/* Make New Page + Sign Out match */
+#newPageButton,
+#logoutButton {
+  min-width: 120px;
+  width: 120px;           /* forces equal width */
+  display: inline-flex;   /* aligns text consistently */
+  justify-content: center;
+  align-items: center;
+  padding: 6px 14px;      /* same padding for both */
+  white-space: nowrap;
 }
 
 .row {
@@ -235,6 +243,25 @@ body {
 
 #files-button:hover {
   background-color: var(--highlight-color);
+}
+
+/* Make selected/highlighted text white (with your purple highlight) */
+::selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+::-moz-selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+/* Document links should stay white */
+.document-link,
+.document-link:visited,
+.document-link:hover,
+.document-link:active {
+  color: #fff;
 }
 
 .source-box {
@@ -533,7 +560,7 @@ body {
   flex: 1 1 0;          /* Grow and shrink from a baseline of 0 */
   width: 0;             /* Tells the browser: "Don't get your width from the text" */
   min-width: 0;         /* Allows it to be smaller than default textarea size */
-  
+
   /* 2. Vertical Growth Logic */
   field-sizing: content;
   overflow-wrap: break-word; /* Forces long words to break rather than push */
@@ -547,7 +574,7 @@ body {
   border: 1px solid var(--border-color);
   outline: none;
   resize: none;
-  min-height: 43px;
+  min-height: var(--chat-input-height);
   max-height: 200px;
   overflow-y: auto;
   box-sizing: border-box;
@@ -564,9 +591,16 @@ body {
   background-color: var(--highlight-color);
 }
 
+/* Send button fixed square */
 #sendButton {
-  /* Has unique width */
-  width: 43px;
+  width: var(--chat-input-height);
+  height: var(--chat-input-height);
+  min-width: var(--chat-input-height);
+  flex: 0 0 var(--chat-input-height);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /**************************************************/

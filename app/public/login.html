@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Chatbot - Login</title>
+
+  <link rel="stylesheet" href="stylesheets/style.css">
+  <link rel="stylesheet" href="stylesheets/sourcePopup.css">
+  <link rel="stylesheet" href="stylesheets/documentPopup.css">
+  <link rel="stylesheet" href="stylesheets/login.css">
+</head>
+
+<body>
+  <div class="auth-page">
+    <div class="auth-shell" id="authShell">
+      <!-- Sign In panel -->
+      <div class="panel" id="signInPanel">
+        <div class="panel-header">Research Chatbot</div>
+        <div class="muted">
+          Sign in to access your notebook. Accounts are limited to <strong>@up.edu</strong> emails.
+        </div>
+
+        <div class="field">
+          <div class="label">Email</div>
+          <input class="input" id="loginEmail" placeholder="yourname@up.edu" autocomplete="username" />
+        </div>
+
+        <div class="field">
+          <div class="label">Password</div>
+          <input class="input" id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div class="row-actions">
+          <button class="custom-button" id="loginBtn">Sign In</button>
+          <button class="secondary-button" id="goToCreateBtn" type="button">Create account</button>
+        </div>
+
+        <div class="status" id="loginStatus"></div>
+      </div>
+
+      <!-- Create Account panel (hidden by default) -->
+      <div class="panel" id="createPanel" style="display:none;">
+        <div class="panel-header">Create account</div>
+        <div class="muted">
+          Step 1: enter your <strong>@up.edu</strong> email to receive a verification code.
+        </div>
+
+        <div class="steps">
+          <div class="chip active" id="chip1">1) Email</div>
+          <div class="chip" id="chip2">2) Verify</div>
+          <div class="chip" id="chip3">3) Password</div>
+        </div>
+
+        <div id="step1">
+          <div class="field">
+            <div class="label">UP Email</div>
+            <input class="input" id="signupEmail" placeholder="yourname@up.edu" autocomplete="email" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="sendCodeBtn">Send verification code</button>
+            <button class="secondary-button" id="backToSignInBtn" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div id="step2" style="display:none;">
+          <div class="muted">Step 2: check your email and enter the 6-digit code.</div>
+          <div class="field">
+            <div class="label">Verification code</div>
+            <input class="input" id="verifyCode" placeholder="123456" inputmode="numeric" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="verifyBtn">Verify code</button>
+            <button class="secondary-button" id="resendBtn" type="button">Resend</button>
+            <button class="secondary-button" id="backToSignInBtn2" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div id="step3" style="display:none;">
+          <div class="muted">Step 3: create a password (8+ characters).</div>
+          <div class="field">
+            <div class="label">New password</div>
+            <input class="input" id="newPassword" type="password" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+          <div class="row-actions">
+            <button class="custom-button" id="setPasswordBtn">Set password & sign in</button>
+            <button class="secondary-button" id="backToSignInBtn3" type="button">Back to sign in</button>
+          </div>
+        </div>
+
+        <div class="status" id="signupStatus"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="javascripts/login.js"></script>
+</body>
+</html>
