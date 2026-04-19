@@ -135,6 +135,7 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-right: 10px;
+  gap: 10px; /* spacing between New Page + Sign Out */
 } 
 
 .title {
@@ -164,10 +165,16 @@ body {
   outline: none;
 }
 
-#newPageButton {
-  width: auto;
-  display: inline-block;
-  padding: 6px 14px;
+/* Make New Page + Sign Out match */
+#newPageButton,
+#logoutButton {
+  min-width: 120px;
+  width: 120px;           /* forces equal width */
+  display: inline-flex;   /* aligns text consistently */
+  justify-content: center;
+  align-items: center;
+  padding: 6px 14px;      /* same padding for both */
+  white-space: nowrap;
 }
 
 .row {
@@ -235,6 +242,25 @@ body {
 
 #files-button:hover {
   background-color: var(--highlight-color);
+}
+
+/* Make selected/highlighted text white (with your purple highlight) */
+::selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+::-moz-selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+/* Document links should stay white */
+.document-link,
+.document-link:visited,
+.document-link:hover,
+.document-link:active {
+  color: #fff;
 }
 
 .source-box {
