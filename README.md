@@ -7,56 +7,49 @@ Here is the chatbot's tree format:
 
 ```
 CS341_AI_Chatbot   
-└─── app
-    │   .env
-    │   aibot.sql
-    │   app.js
-    │   babel.config.cjs
-    │   dbms.js
-    │   package-lock.json
-    │   package.json
-    │
-    ├─── public
-    │   │   index.html
-    │   │
-    │   ├─── javascripts
-    │   │       chatLogic.js
-    │   │       mainScript.js
-    │   │
-    │   ├─── popups
-    │   │       addDocuments.html
-    │   │       addSources.html
-    │   │
-    │   ├─── stylesheets
-    │   │       documentPopup.css
-    │   │       sourcePopup.css
-    │   │       style.css
-    │   │
-    │   ├─── tests
-    │   │       chatLogic.test.js
-    │   │       mainScript.test.js
-    │   │
-    │   └─── uploads
-    │        └─── {ChatbotMeetingID}
-    │                user_document.pdf
-    │
-    └─── routes
-            deleteDocument.js
-            deletePage.js
-            deleteURL.js
-            index.js
-            loadDocuments.js
-            loadPage.js
-            loadPages.js
-            loadTopics.js
-            loadURL.js
-            saveDocument.js
-            savePage.js
-            saveTitle.js
-            saveTopics.js
-            saveURL.js
-            searchWeb.js
-            users.js
+└── app
+    ├── aibot.sql
+    ├── app.js
+    ├── babel.config.cjs
+    ├── dbms.js
+    ├── middleware
+    │   └── requireAuthPage.js
+    ├── package.json
+    ├── package-lock.json
+    ├── public
+    │   ├── images
+    │   │   ├── chatbot.png
+    │   │   ├── logout.svg
+    │   │   ├── new_page.svg
+    │   │   ├── page.svg
+    │   │   ├── send.svg
+    │   │   └── upload.svg
+    │   ├── index.html
+    │   ├── javascripts
+    │   │   ├── chatLogic.js
+    │   │   ├── login.js
+    │   │   └── mainScript.js
+    │   ├── login.html
+    │   ├── popups
+    │   │   ├── addDocuments.html
+    │   │   └── addSources.html
+    │   ├── stylesheets
+    │   │   ├── documentPopup.css
+    │   │   ├── login.css
+    │   │   ├── sourcePopup.css
+    │   │   └── style.css
+    │   └── tests
+    │       ├── chatLogic.test.js
+    │       └── mainScript.test.js
+    └── routes
+        ├── auth.js
+        ├── documents.js
+        ├── loadLogin.js
+        ├── pages.js
+        ├── searchWeb.js
+        ├── topics.js
+        ├── urls.js
+        └── users.js
 ```
 
 ## `app` Directory
@@ -93,14 +86,17 @@ This is the main functionality for the chatbot, it utliizes a few different feat
         * When a Chatbot meeting is deleted, all relevant database information and local documents are deleted as well.
 
 ### `app/routes` Directory
-* `delete*.js`: Files that handle database queries to delete Pages/Topics/URLs/Documents.
-* `load*.js`: Files that handle database queries to retrieve Pages/Topics/URLs/Documents.
-* `save*.js`: Files that handle database queries to save Pages/Topics/URLs/Documents.
-* `users.js` and `index.js`: Files that handle searching on the web for online sources.
+* `auth.js`: Handles login features, sends one-time codes to @up.edu emails for verification.
+* `documents.js`: Routes that handle database queries to upload/fetch/delete Documents.
+* `users.js` and `searchWeb.js`: Files that handle searching on the web for online sources.
+* `loadLogin.js`: Generates the login page.
+* `pages.js`: Routes that handle database queries to upload/fetch/delete Pages.
+* `topics.js`: Routes that handle database queries to upload/fetch/delete Topics.
+* `urls.js`: Routes that handle database queries to upload/fetch/delete URLs.
 
 # How To Use the Chatbot
 
-![Chatbot Website](./Chatbot.png)
+![Chatbot Website](./app/public/images/chatbot.png)
 
 The main functionality of the Chatbot is the middle panel, where the conversation with the LLM occurs. You are able to type in the text area below, and press Enter to query your response.
 
