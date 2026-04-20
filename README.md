@@ -64,13 +64,20 @@ This is the main functionality for the chatbot, it utliizes a few different feat
     * Routes contain CRUD and general manipulation of the database.
 * `dbms.js`: Database manager that is able to reference the databases, referenced by all `app/routes` files (provided by Dr. Cenek).
 * `babel.config.cjs`, `package-lock.json` and `package.json`: reference relevant dependencies and packages necessary for all website functionality.
+* `middleware/requireAuthPage.js`: File used for serving the login page when applicable.
+
+### `app/images` Directory
+* Contains SVG files for the aesthetic purposes of the website, used from Google symbols for ease of identification.
+* Contains .png files for this README documentation.
 
 ### `app/public` Directory
 * `index.html`: The main HTML file for the website page, contains separate panels for Sources, Previous Meetings, Chatbot, Topics, and Upcoming Tasks.
+* `login.html`: The HTML file for the login page, contains sections for signing in, signing up, and changing a password.
 
 * `javascripts/`:
     * `chatLogic.js`: Generates the HTML necessary for displaying various data on the website, also does some code validation.
     * `mainScipt.js`: Where all the rest of the JS lives for the website, calls routes to manipulate the database, handles listeners, etc.
+    * `login.js`: Where functional code for login HTML is stored, serves different windows, sends verification codes, password changes, database management, etc.
 * `popups/`:
     * `addDocuments.html`: Defines the popup that appears when you upload documents.
     * `addSources.html`: Defines the popup that appears when you search the web.
@@ -78,6 +85,7 @@ This is the main functionality for the chatbot, it utliizes a few different feat
     * `documentPopup.css`: Stylesheet for the Document Popup
     * `sourcePopup.css`: Stylesheet for the Sources Popup
     * `style.css`: The main stylesheet for the main webpage layout.
+    * `login.css`: The main stylesheet for the login page layout (innherits some from `style.css`).
 * `tests/`:
     * `chatLogic.test.js` and `mainScript.test.js`: Contain Jest testing functions for code coverage.
 * `uploads/`:
@@ -95,6 +103,12 @@ This is the main functionality for the chatbot, it utliizes a few different feat
 * `urls.js`: Routes that handle database queries to upload/fetch/delete URLs.
 
 # How To Use the Chatbot
+
+![Chatbot Sign In](./app/public/images/sign_in.png)
+
+This is the sign in page, which will load upon accessing the site. If you do not have an account, you can create one using your @up.edu email address. The site will send you a verification code for one-time use, which will allow you to create a password and enter the site. 
+
+You may also reset a password, which will also send a one-time verification code. Once signed in, this is what you will see:
 
 ![Chatbot Website](./app/public/images/chatbot.png)
 
