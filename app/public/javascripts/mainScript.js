@@ -37,6 +37,8 @@ window.addEventListener("DOMContentLoaded", () => {
   loadSavedPages();
   setupTopicsPanel();
   attachSourceDeleteButton();
+ 
+  document.getElementById("logoutButton")?.addEventListener("click", logout);
 });
 
 /* =========================================================
@@ -60,6 +62,15 @@ function setupTopBar() {
 
   // new page button
   newPageBtn.addEventListener("click", createNewPage);
+}
+
+async function logout() {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } finally {
+    // Always go back to login, even if the request fails
+    window.location.href = '/login';
+  }
 }
 
 /* Saves the page title to database */
@@ -789,6 +800,7 @@ window.performSearch = performSearch;
 window.closeSourcesPopup = closeSourcesPopup;
 window.closeDocPopup = closeDocPopup;
 window.addDocuments = addDocuments;
+window.logout = logout;
 
 export {
   loadSourcesFromDB,

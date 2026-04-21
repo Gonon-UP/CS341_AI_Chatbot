@@ -18,9 +18,17 @@
     <!-- Container to separate Title and Row (where element are displayed) -->
     <div class="page">
         <div class="title-container">
-            <textarea class="title" id="titleArea" placeholder="Notebook Title" maxlength="50" rows="1"></textarea>
+            <textarea class="title" id="titleArea" placeholder="Untitled Notebook" maxlength="50" rows="1"></textarea>
+	   
+	    <button class="custom-button" id="newPageButton">
+		    <img src="/images/new_page.svg" alt="" class="btn-icon">
+		    <span>New Page</span>
+	    </button>
 
-            <button class="custom-button" id="newPageButton">New Page</button>
+	    <button class="custom-button" id="logoutButton">
+		    <img src="/images/logout.svg" alt="" class="btn-icon">
+		    <span>Sign Out</span>
+	    </button>
         </div>
 
         <!-- Displays 3 sections (left, middle, right columns)
@@ -35,7 +43,9 @@
                         <!-- Upload Sources and Files buttons -->
                         <div class="sources-controls">
                             <button class="custom-button" onclick="addSources()">+ Add Web Sources</button>
-                            <button class="custom-button" id="files-button" onclick="addDocuments()">↑</button>
+                            <button class="custom-button" id="files-button" onclick="addDocuments()">
+				    <img src="/images/upload.svg" alt="Upload Documents">
+			    </button>
                         </div>
 
                         <div id="sourcesList" class="custom-list"></div>
@@ -64,7 +74,9 @@
                         <div class="input-container">
                             <textarea class="text-box" id="textBox" placeholder="Ask a question..." rows="1"></textarea>
 
-                            <button id="sendButton" class="custom-button" onclick="sendMessage()">→</button>
+			    <button class="custom-button" id="sendButton" onclick="sendMessage()">
+                                    <img src="/images/send.svg" alt="Send">
+                            </button>
                         </div>
                     </div>
                 </div>

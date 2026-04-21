@@ -26,16 +26,40 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ================================
-   UPLOAD ROUTE
+   GET DOCUMENTS FOR A PAGE
+================================ */
+router.get("/getDocuments", (req, res) => {
+  const page_number = req.query.pageId;
+  if (!page_number) return res.status(400).json({ error: "Missing pageId" });
+
+  const selectQuery = `
+    SELECT document_id, original_name, file_name, file_path, file_size, upload_date
+    FROM documents
+    WHERE page_number = ?
+    ORDER BY upload_date ASC
+  `;
+
+  db.dbquery(selectQuery, [page_number], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Database query failed" });
+    }
+
+    res.json({ success: true, documents: results });
+  });
+});
+
+/* ================================
+   UPLOAD DOCUMENT
 ================================ */
 router.post("/uploadDocument", upload.single("document"), (req, res) => {
   const file = req.file;
   const page_number = req.query.pageId;
 
+  if (!page_number) return res.status(400).json({ error: "Missing pageId" });
   if (!file) return res.status(400).json({ error: "No file uploaded" });
 
   const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
-
   const filePath = `uploads/${page_number}/${safeName}`;
 
   const insertQuery = `
@@ -53,7 +77,6 @@ router.post("/uploadDocument", upload.single("document"), (req, res) => {
         return res.status(500).json({ error: "Insert failed" });
       }
 
-      // Return file info so frontend can update the popup list
       res.json({
         success: true,
         document: {
@@ -66,6 +89,41 @@ router.post("/uploadDocument", upload.single("document"), (req, res) => {
       });
     }
   );
+});
+
+/* ================================
+   DELETE DOCUMENT (DB + FILE)
+================================ */
+router.delete("/document/:id", (req, res) => {
+  const document_id = req.params.id;
+
+  const getQuery = `SELECT * FROM documents WHERE document_id = ?;`;
+
+  db.dbquery(getQuery, [document_id], (err, results) => {
+    if (err || results.length === 0) {
+      return res.status(404).json({ error: "Document not found" });
+    }
+
+    const doc = results[0];
+    const fullPath = path.join(process.cwd(), doc.file_path);
+
+    // Delete file from disk
+    fs.unlink(fullPath, (fsErr) => {
+      if (fsErr) {
+        console.warn("File delete warning:", fsErr.message);
+        // continue anyway (DB still needs cleanup)
+      }
+
+      const deleteQuery = `DELETE FROM documents WHERE document_id = ?;`;
+
+      db.dbquery(deleteQuery, [document_id], (err2) => {
+        if (err2) {
+          return res.status(500).json({ error: "Delete failed" });
+        }
+        res.json({ success: true });
+      });
+    });
+  });
 });
 
 module.exports = router;
