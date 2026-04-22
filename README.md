@@ -1,7 +1,8 @@
 # Research Chatbot
 
 > [!IMPORTANT]
-> To access the Chatbot on Virtual Machine or on Staff WIFI, click this [link](http://cs341aiphys:3000).
+> To access the Chatbot on Virtual Machine or on Staff WiFi, click this [link](http://cs341aiphys:3000).
+> This can not currently be accessed using Student WiFi.
 
 Here is the chatbot's tree format:
 
@@ -38,9 +39,13 @@ CS341_AI_Chatbot
     │   │   ├── login.css
     │   │   ├── sourcePopup.css
     │   │   └── style.css
-    │   └── tests
-    │       ├── chatLogic.test.js
-    │       └── mainScript.test.js
+    │   ├── tests
+    │   │   ├── chatLogic.test.js
+    │   │   └── mainScript.test.js
+    │   └── uploads
+    │       └── <ChatbotMeetingID>
+    │          ├── <UserDocument>
+    │          └── <UserDocument>
     └── routes
         ├── auth.js
         ├── documents.js
@@ -89,9 +94,9 @@ This is the main functionality for the chatbot, it utliizes a few different feat
 * `tests/`:
     * `chatLogic.test.js` and `mainScript.test.js`: Contain Jest testing functions for code coverage.
 * `uploads/`:
-    * `{ChatbotMeetingID}/*`: Contains files uploaded for each Chatbot session (ChatbotMeetingID).
-        * These are stored on the VM but are tracked and referenced in the `documents` page in the database as well.
-        * When a Chatbot meeting is deleted, all relevant database information and local documents are deleted as well.
+    * `<ChatbotMeetingID>/*`: Contains files uploaded for each Chatbot session (ChatbotMeetingID).
+        * These are stored on the VM but are tracked and referenced in the `documents` table in the database as well.
+        * When a Chatbot meeting is deleted, all relevant database information and local documents are deleted along with the meeting.
 
 ### `app/routes` Directory
 * `auth.js`: Handles login features, sends one-time codes to @up.edu emails for verification.
@@ -128,14 +133,45 @@ On the right size of the page, the `Topics` section is where you may select the 
 
 The `Upcoming Tasks` section is a user tool that is meant to keep track of upcoming tasks and deadlines. This is an extra feature and does not impact the Chatbot's responses.
 
-# Jest Code Coverage (as of Sprint 4)
-File           | % Stmts | % Branch | % Funcs | % Lines
----------------|---------|----------|---------|---------
-All files      |   62.17 |    38.94 |   78.57 |   64.17
- chatLogic.js  |     100 |       60 |     100 |     100
- mainScript.js |   61.37 |    37.77 |   75.51 |   63.37
+# FINAL DETAILS
 
-# Resolved Bugs
+## Jest Code Coverage (as of Sprint 5)
+---------------|---------|----------|---------|---------
+File           | % Stmts | % Branch | % Funcs | % Lines                                                                                    
+---------------|---------|----------|---------|---------                                                                                                      
+ chatLogic.js  |     100 |       60 |     100 |     100                                                                                                
+ mainScript.js |   60.86 |    38.04 |   72.91 |   62.88  
+---------------|---------|----------|---------|---------
+
+## App Runtime
+For each .html file:
+* `login.html`: 13ms
+* `index.html` (after successful login): 9ms
+* `addDocuments.html`: 4ms
+* `addSources.html`: 6ms
+
+## Compatible Browsers
+Tested on Firefox and Chrome on Windows and Linux. This app is not designed for mobile browser usage.
+
+> [!NOTE]
+> There is a [documented bug](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/12) where disabling the warning message for deleting Previous Meetings results in an inability to delete other Previous Meetings, though it was unable to be replicated and the affected browser was also unspecified.
+
+## Security
+In order to protect the client's information, the app launches a sign-in page upon starting. If the user does not have an account, it prompts the user to create one using their @up.edu email. A one-time verification code is sent to their email to verify their UP affiliation. Their password is stored in our database using an encrypted hash function.
+* This app uses Node.js [bcrypt](https://www.npmjs.com/package/bcrypt) features for secure encryption and decryption.
+
+## Resolved Bugs
 [BUG #1](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/16): Adding a URL directly to the Sources list.
 
 [BUG #2](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/13): Accessing README.txt resulting in 'error: not found'.
+
+## Unresolved Bugs
+[BUG #3](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/14): Uploaded Documents not appearing in Sources list.
+* This is an intentional choice, for large document uploads, we didn't want the Sources to be cluttered. This is meant for URLs only.
+
+[BUG #4](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/17) and [BUG #5](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/12): Previous Meetings unable to be deleted.
+* This bug did not seem to persist on Firefox nor Chrome, so it has not been resolved (unable to replicate).
+
+[BUG #6](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/18) and [BUG #7](https://github.com/Gonon-UP/CS341_AI_Chatbot/issues/15): Chats between user and Chatbot are not saved between pages.
+* This is a feature that is meant to be completed by Sprint 5.
+
