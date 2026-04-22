@@ -1,6 +1,0 @@
-# Ignore virtual environment
-venv/
-raglogic/lib/
-raglogic/bin/
-raglogic/include/
-raglogic/share/
