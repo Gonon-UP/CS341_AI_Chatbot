@@ -6,6 +6,7 @@
   --highlight-color: #3d2b5d;
   --title-color: #ffffff;
   --element-title-color: #d4d4d4;
+  --chat-input-height: 46px;
 }
 
 body {
@@ -71,17 +72,52 @@ body {
   color: white; /* Darker text for contrast */
   
   /* Smoothly fades the color over 0.3 seconds */
-  transition: background-color 0.3s ease;
-  transition: border-color 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.custom-botton:hover {
+.custom-button:hover {
   /* Fades to a light whitish purple */
   background-color: var(--highlight-color);
 }
 
 .custom-button:active {
   border: 1px solid white;
+}
+
+/* CUSTOM LIST - used for sources, pages, topics */
+.custom-list {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  overflow-y: auto;
+}
+
+/* Scrollbar styling to match chat + sources */
+.custom-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) var(--element-color);
+}
+
+.custom-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-list::-webkit-scrollbar-track {
+  background: var(--element-color);
+  border-radius: 10px;
+}
+
+.custom-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.custom-list::-webkit-scrollbar-thumb:hover {
+  background: var(--highlight-color);
 }
 
 /**************************************************/
@@ -95,6 +131,14 @@ body {
   flex-direction: column;
 }
 
+.title-container{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 10px;
+  gap: 10px; /* spacing between New Page + Sign Out */
+} 
+
 .title {
   color: var(--title-color);
   background: var(--background-color);
@@ -105,6 +149,7 @@ body {
   font-size: 30px;
   font-weight: bold;
   border: none;
+  flex: 1;
 }
 
 .title::placeholder {
@@ -119,6 +164,18 @@ body {
 
 .title:focus {
   outline: none;
+}
+
+/* Make New Page + Sign Out match */
+#newPageButton,
+#logoutButton {
+  min-width: 120px;
+  width: 120px;           /* forces equal width */
+  display: inline-flex;   /* aligns text consistently */
+  justify-content: center;
+  align-items: center;
+  padding: 6px 14px;      /* same padding for both */
+  white-space: nowrap;
 }
 
 .row {
@@ -139,6 +196,7 @@ body {
   display: flex;
   flex-direction: column; /* stack vertically */
   gap: 16px;
+  min-width: 0;
 } 
 
 /**************************************************/
@@ -149,25 +207,244 @@ body {
 #sourcesPanel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  padding: 10px;
+  flex: 1;
+  min-height: 0;
+
+  align-items: stretch;
+  gap: 12px;
 }
 
-.drive-status {
-  width: 100%;
-  cursor: pointer;
+.sources-controls {
   display: flex;
-  align-items: left;
-  justify-content: left;
+  gap: 10px;
+  width: 100%;
+}
+
+.sources-controls .custom-button:first-child {
+  flex: 1;
+}
+
+/* Upload files button */
+#files-button {
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+
+  border: 1px solid var(--border-color);
+  background-color: var(--background-color);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#files-button:hover {
+  background-color: var(--highlight-color);
+}
+
+/* Make selected/highlighted text white (with your purple highlight) */
+::selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+::-moz-selection {
+  background: var(--highlight-color);
+  color: #fff;
+}
+
+/* Document links should stay white */
+.document-link,
+.document-link:visited,
+.document-link:hover,
+.document-link:active {
+  color: #fff;
+}
+
+.source-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--element-color);
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--element-title-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 12px;
+  box-shadow: 0 2px 6px #00000020;
+}
+
+.source-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.source-favicon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.source-title {
+  color: var(--element-title-color);
+  text-decoration: none;
+  font-size: 14px;
+
+  white-space: normal;        /* allow wrapping */
+  word-break: break-word;     /* break long URLs */
+  overflow-wrap: anywhere;    /* ensures very long strings wrap */
+}
+
+.source-title:hover {
+  text-decoration: underline;
+}
+
+.remove-source {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  border: none;
+
+  background-color: var(--highlight-color);
+  color: white;
+
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.remove-source:hover {
+  background-color: #5e41a0;
 }
 
 /* Meetings panel */
 #meetingsPanel {
-  /* Not yet implemented */
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: 100%;   /* ensure it fills the parent vertically */
+  flex: 1;
+  min-width: 0;   /* critical */
+  min-height: 0;
+  align-items: stretch;
+}
+
+/* Container for the list of pages */
+.pages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  flex: 1;           /* fill remaining vertical space */
+  min-height: 0;     /* critical */
+  min-width: 0;      /* critical */
+  overflow-y: auto;  /* vertical scroll if needed */
+  overflow-x: hidden;/* prevent horizontal scroll */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Each page card */
+.page-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  width: 100%;       /* always fill parent width */
+  min-width: 0;      /* prevent flex item from overflowing horizontally */
+  box-sizing: border-box;
+
+  background-color: var(--element-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 12px;
+
+  box-shadow: 0 2px 6px #00000020;
+  transition: background-color 0.2s ease;
+}
+
+/* Container for icon + title */
+.page-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  flex: 1;
+  min-width: 0;   /* prevents child from forcing card wider */
+  overflow: hidden;
+}
+
+/* Page icon */
+.page-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* Page title text */
+.page-title {
+  background: none;
+  border: none;
+  color: var(--element-title-color);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  white-space: normal;       
+  word-break: break-word;    
+  overflow-wrap: anywhere;
+
+  text-align: left;
+  padding: 0;
+
+  /* key: do not shrink below 0 and always take remaining space */
+  flex: 1;
+  min-width: 0;
+}
+
+.page-title:hover {
+  text-decoration: underline;
+}
+
+/* Delete button */
+.delete-page {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  border: none;
+
+  background-color: var(--highlight-color);
+  color: white;
+
+  font-size: 16px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.delete-page:hover {
+  background-color: #5e41a0;
 }
 
 /**************************************************/
@@ -283,7 +560,7 @@ body {
   flex: 1 1 0;          /* Grow and shrink from a baseline of 0 */
   width: 0;             /* Tells the browser: "Don't get your width from the text" */
   min-width: 0;         /* Allows it to be smaller than default textarea size */
-  
+
   /* 2. Vertical Growth Logic */
   field-sizing: content;
   overflow-wrap: break-word; /* Forces long words to break rather than push */
@@ -297,7 +574,7 @@ body {
   border: 1px solid var(--border-color);
   outline: none;
   resize: none;
-  min-height: 42px;
+  min-height: var(--chat-input-height);
   max-height: 200px;
   overflow-y: auto;
   box-sizing: border-box;
@@ -314,9 +591,16 @@ body {
   background-color: var(--highlight-color);
 }
 
+/* Send button fixed square */
 #sendButton {
-  /* Has unique width */
-  width: 43px;
+  width: var(--chat-input-height);
+  height: var(--chat-input-height);
+  min-width: var(--chat-input-height);
+  flex: 0 0 var(--chat-input-height);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /**************************************************/
@@ -328,8 +612,48 @@ body {
   /* Not yet implemented */
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+
+  align-items: stretch;
+  gap: 12px;
 }
+
+.topic-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background-color: var(--element-color);
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--element-title-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 8px 12px;
+  gap: 12px;
+  box-shadow: 0 2px 6px #00000020;
+}
+
+.topic-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+  width: 100%;
+}
+
+.topic-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+.topic-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 
 /* Tasks panel */
 #tasksPanel {

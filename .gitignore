@@ -1,6 +1,5 @@
 node_modules/
 
-
 # Ignore virtual environment
 rag_ollama/raglogic/
 rag_ollama/raglogic/lib/
@@ -16,3 +15,6 @@ __pycache__/
 # embedding DB
 rag_ollama/chroma/
 *.sqlite3
+
+app/coverage/
+
