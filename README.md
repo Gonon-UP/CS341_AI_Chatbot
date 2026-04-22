@@ -136,12 +136,10 @@ The `Upcoming Tasks` section is a user tool that is meant to keep track of upcom
 # FINAL DETAILS
 
 ## Jest Code Coverage (as of Sprint 5)
----------------|---------|----------|---------|---------
 File           | % Stmts | % Branch | % Funcs | % Lines                                                                                    
 ---------------|---------|----------|---------|---------                                                                                                      
  chatLogic.js  |     100 |       60 |     100 |     100                                                                                                
  mainScript.js |   60.86 |    38.04 |   72.91 |   62.88  
----------------|---------|----------|---------|---------
 
 ## App Runtime
 For each .html file:
