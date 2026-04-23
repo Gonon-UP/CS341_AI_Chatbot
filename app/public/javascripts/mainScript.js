@@ -343,9 +343,10 @@ async function getBotReply(query) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'llama3-chatqa:latest', // Just a model we have in the VM
+        //model: query, // originally model: 'llama3-chatqa:latest' Just a model we have in the VM
         prompt: query,
-        stream: false    // Keeps it simple by waiting for the full response instead of streaming chunks
+	page_id: currentPageId
+        //stream: false    // Keeps it simple by waiting for the full response instead of streaming chunks
       })
     });
 
@@ -669,13 +670,16 @@ async function uploadDocument(pageId) {
 
   const file = fileInput.files[0];
   const formData = new FormData();
-  formData.append("document", file);
+  // originally formData.append("document", file);
+  formData.append("file", file);
   formData.append("pageId", pageId); // send the correct pageId
 
   // uploads a document with reference to this page's ID
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
-
+  
+  //originally: xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
+  xhr.open("POST", `http://10.12.18.250:11434/uploadDocument?pageId=${pageId}`, true);
+  
   const progressContainer = overlay.querySelector("#uploadProgress");
   const progressBar = overlay.querySelector("#progressBar");
   const progressText = overlay.querySelector("#progressText");
