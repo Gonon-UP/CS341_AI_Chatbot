@@ -31,20 +31,62 @@ async def generate(query: Query):
     result = query_rag(query.prompt, page_id=query.page_id)
     return result
 
+
+class IngestRequest(BaseModel):
+    pageId: int
+    filePath: str
+    fileName: str
+    documentId: int | None = None
+
+#endpoint for ingesting documents so they still go into the sql database
+@bridge.post("/ingestDocument")
+async def ingest_document(data: IngestRequest):
+
+    full_path = f"../app/{data.filePath}"
+
+    print("Ingesting:", full_path)
+
+    if not os.path.exists(full_path):
+        return {"success": False, "error": "File not found"}
+
+    # 1. Load PDF
+    loader = PyPDFLoader(full_path)
+    documents = loader.load()
+
+    # 2. Add metadata
+    for doc in documents:
+        doc.metadata["page_id"] = data.pageId
+        doc.metadata["source"] = data.fileName
+        doc.metadata["document_id"] = data.documentId
+
+    # 3. Add to vector DB
+    document_addition(documents)
+
+    return {
+        "success": True,
+        "message": "Document embedded into RAG",
+        "documentId": data.documentId
+    }
+
+
 #endpoint for pdf uploading from the website
 @bridge.post("/uploadDocument")
-async def upload_document(file: UploadFile = File(...), pageId: int = 0):
+async def upload_document(document: UploadFile = File(...), pageId: int = 0):
     
     print("upload endpoint accessed")
 
     upload_dir = f"../app/uploads/{pageId}"
     os.makedirs(upload_dir, exist_ok=True)
+    
 
-    file_path = os.path.join(upload_dir, file.filename)
+    #set the file path
+    file_path = os.path.join(upload_dir, document.filename)
     
     # save the files to the directory
     with open(file_path, "wb") as f:
-        f.write(await file.read())
+        f.write(await document.read())
+
+    file_size = os.path.getsize(file_path)
 
     print("file saved")
 
@@ -56,7 +98,7 @@ async def upload_document(file: UploadFile = File(...), pageId: int = 0):
 
     # adding metadata
     for doc in documents:
-        doc.metadata["source"] = file.filename
+        doc.metadata["source"] = document.filename
         doc.metadata["page_id"] = int(pageId)
         doc.metadata["type"] = "pdf"
 
@@ -69,7 +111,15 @@ async def upload_document(file: UploadFile = File(...), pageId: int = 0):
 
     return {
         "success": True,
-        "message": "Document uploaded and embedded"
+        "message": "Document uploaded and embedded",
+        "document": {
+            "document_id": 1,  # temp
+            "file_name": document.filename,
+            "original_name": document.filename,
+            "file_size": os.path.getsize(file_path),
+            "page_number": pageId
+
+        }
     }
 
 

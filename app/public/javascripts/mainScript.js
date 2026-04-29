@@ -334,10 +334,10 @@ async function sendMessage() {
 /* Will need updating, actually queries the Ollama model */
 async function getBotReply(query) {
   // LAN IP address the virtual machine, hosting the ollama
-  const ollamaUrl = 'http://10.12.18.250:11434/api/generate'; //
+  //const ollamaUrl = 'http://10.12.18.250:11434/api/generate';
 
   try {
-    const response = await fetch(ollamaUrl, {
+    const response = await fetch("/chat", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -671,14 +671,14 @@ async function uploadDocument(pageId) {
   const file = fileInput.files[0];
   const formData = new FormData();
   // originally formData.append("document", file);
-  formData.append("file", file);
+  formData.append("document", file);
   formData.append("pageId", pageId); // send the correct pageId
 
   // uploads a document with reference to this page's ID
   const xhr = new XMLHttpRequest();
   
   //originally: xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
-  xhr.open("POST", `http://10.12.18.250:11434/uploadDocument?pageId=${pageId}`, true);
+  xhr.open("POST", `/uploadDocument?pageId=${pageId}`, true);
   
   const progressContainer = overlay.querySelector("#uploadProgress");
   const progressBar = overlay.querySelector("#progressBar");

@@ -37,8 +37,6 @@ def load_documents():
     #loads pdf docs then returns them as a list of Document objects
     return documents
 
-#documents = load_documents() #calls the load documents function to initialize the pdf loader
-
 def split_text(documents: list[Document]):
   """
   Split the text content of the given list of Document objects into smaller chunks.
@@ -61,18 +59,12 @@ def split_text(documents: list[Document]):
       raise ValueError("No chunks were created")
   print(f"Split {len(documents)} documents into {len(chunks)} chunks.")
 
-  # Print example of page content and metadata for a chunk
-  #document = chunks[10]
-  #print("Here is an example of page content in a chunk")
-  #print(document.page_content)
-
-  #print("here is an example of the metadata in a chunk")
-  #print(document.metadata)
 
   return chunks # Return the list of split text chunks
 
 model = ChatOllama(model="llama3-chatqa", base_url="http://10.12.18.250:6006", temperature=0)
 
+#this function is for doing a normal llm query if there is nothing in the chroma database
 def query_llm_only(query_text: str):
     response = model.invoke(query_text)
     return {
@@ -85,7 +77,7 @@ def query_llm_only(query_text: str):
 #our document objects
 CHROMA_PATH = "chroma"
 
-#this is used to build the database from scratch
+#this is used to reset and rebuild the chroma database
 def reset_chroma(chunks: list[Document]):
     """
     this saves the given list of Document objects to a Chroma database.
@@ -137,10 +129,6 @@ def generate_data_store():
    chunks = split_text(documents) # splits docs into managable chunks
    save_to_chroma(chunks) #saves the processed data into a data store
    print("Data store generated")
-
-#load_dotenv() #only needs to be used if an api key is needed or to load any .env files
-
-#generate_data_store() #function call to generate the processed data
 
 
 # this is where the actual query for our main chatbot will be fed from the
@@ -196,8 +184,16 @@ def query_rag(query_text: str, page_id=None, urls=None):
   # from the database
   results = db.similarity_search_with_relevance_scores(query_text, k=6, filter={"page_id": int(page_id)} if page_id is not None else None)
 
-  filtered = db.get(where={"page_id": int(page_id)})
-  print("DOCS FOR THIS PAGE:", len(filtered["ids"]))
+  #filtered = db.get(where={"page_id": int(page_id)})
+  #print("DOCS FOR THIS PAGE:", len(filtered["ids"]))
+
+  if page_id is not None:
+    filtered = db.get(where={"page_id": int(page_id)})
+    print("DOCS FOR THIS PAGE:", len(filtered["ids"]))
+  else:
+    filtered = {"ids": []}
+    print("No page_id provided → skipping filtered lookup")
+
 
   # Check if there are any matching results or if the relevance score is too low
   # this if statement checks the retrieved context for any matching results
