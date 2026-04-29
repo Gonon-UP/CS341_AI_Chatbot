@@ -52,44 +52,104 @@ router.get("/getDocuments", (req, res) => {
 /* ================================
    UPLOAD DOCUMENT
 ================================ */
-router.post("/uploadDocument", upload.single("document"), (req, res) => {
+const axios = require("axios");
+
+const FastApiUrl = "http://10.12.18.250:8000"; 
+
+router.post("/uploadDocument", upload.single("document"), async (req, res) => {
   const file = req.file;
   const page_number = req.query.pageId;
 
   if (!page_number) return res.status(400).json({ error: "Missing pageId" });
   if (!file) return res.status(400).json({ error: "No file uploaded" });
 
-  const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  //orignally const safeName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+  const safeName = file.filename;
   const filePath = `uploads/${page_number}/${safeName}`;
+  
+  try {
+    // =========================
+    // 1. SAVE TO SQL (source of truth)
+    // =========================
+    const insertQuery = `
+      INSERT INTO documents
+        (page_number, file_name, original_name, file_path, file_size)
+      VALUES (?, ?, ?, ?, ?)
+    `;
 
-  const insertQuery = `
-    INSERT INTO documents
-      (page_number, file_name, original_name, file_path, file_size)
-    VALUES (?, ?, ?, ?, ?);
-  `;
-
-  db.dbquery(
-    insertQuery,
-    [page_number, safeName, safeName, filePath, file.size],
-    (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Insert failed" });
-      }
-
-      res.json({
-        success: true,
-        document: {
-          page_number,
-          file_name: safeName,
-          original_name: file.originalname,
-          file_path: filePath,
-          file_size: file.size
+    const dbResult = await new Promise((resolve, reject) => {
+      db.dbquery(
+        insertQuery,
+        [page_number, safeName, file.originalname, filePath, file.size],
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
         }
+      );
+    });
+
+    const documentId = dbResult.insertId;
+
+    // =========================
+    // 2. CALL FASTAPI (RAG INGESTION)
+    // =========================
+    try {
+      await axios.post(`${FastApiUrl}/ingestDocument`, {
+        pageId: page_number,
+        filePath: filePath,
+        fileName: file.originalname,
+        documentId: documentId
       });
+
+    } catch (ragErr) {
+      console.error("RAG ingestion failed:", ragErr.message);
+      // IMPORTANT: SQL upload still succeeds
     }
-  );
+
+    // =========================
+    // 3. RESPONSE TO FRONTEND
+    // =========================
+    return res.json({
+      success: true,
+      document: {
+        page_number,
+        file_name: safeName,
+        original_name: file.originalname,
+        file_path: filePath,
+        file_size: file.size
+      }
+    });
+
+  } catch (err) {
+    console.error("Upload failed:", err);
+    return res.status(500).json({ error: "Upload failed" });
+  }
+  
 });
+
+
+//chatbot connection
+router.post("/chat", async (req, res) => {
+  try {
+    const { prompt, pageId } = req.body;
+
+    if (!prompt) {
+      return res.status(400).json({ error: "Missing prompt" });
+    }
+
+    const response = await axios.post("http://10.12.18.250:8000/api/generate", {
+      prompt,
+      page_id: pageId
+    });
+
+    res.json(response.data);
+
+  } catch (err) {
+    console.error("Chat error:", err.message);
+    res.status(500).json({ error: "Chat failed" });
+  }
+});
+
 
 /* ================================
    DELETE DOCUMENT (DB + FILE)

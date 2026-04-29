@@ -1,3 +1,20 @@
 node_modules/
 
+# Ignore virtual environment
+rag_ollama/raglogic/
+rag_ollama/raglogic/lib/
+rag_ollama/raglogic/bin/
+rag_ollama/raglogic/include/
+rag_ollama/raglogic/share/
+
+#python
+__pycache__/
+*.pyc
+
+
+# embedding DB
+rag_ollama/chroma/
+*.sqlite3
+
 app/coverage/
+
